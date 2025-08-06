@@ -24,60 +24,75 @@ class _SplashscreenState extends State<Splashscreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Get screen dimensions for responsive design
+    final screenSize = MediaQuery.of(context).size;
+    final imageSize = screenSize.width * 0.6; // 60% of screen width
+    final maxImageSize = 300.0; // Maximum size cap
+    final finalImageSize = imageSize > maxImageSize ? maxImageSize : imageSize;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              height: 300,
-              width: 300,
-              child: Image.asset(
-                "assets/images/splash.jpg",
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    height: 300,
-                    width: 300,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.image_not_supported,
-                          size: 50,
-                          color: Colors.grey,
+      body: SafeArea(
+        // Add SafeArea for better compatibility
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0), // Add padding for safety
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: finalImageSize,
+                  width: finalImageSize,
+                  child: Image.asset(
+                    "assets/images/splash.jpg",
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: finalImageSize,
+                        width: finalImageSize,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        SizedBox(height: 10),
-                        Text(
-                          "Splash Image\nNot Found",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 16,
-                          ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.image_not_supported,
+                              size:
+                                  finalImageSize * 0.16, // Responsive icon size
+                              color: Colors.grey,
+                            ),
+                            SizedBox(height: finalImageSize * 0.03),
+                            Text(
+                              "Splash Image\nNot Found",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize:
+                                    screenSize.width * 0.04, // Responsive text
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(
+                    height: screenSize.height * 0.03), // Responsive spacing
+                const CircularProgressIndicator(),
+                SizedBox(height: screenSize.height * 0.02),
+                Text(
+                  "Loading...",
+                  style: TextStyle(
+                    fontSize: screenSize.width * 0.045, // Responsive text size
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            const CircularProgressIndicator(),
-            const SizedBox(height: 20),
-            const Text(
-              "Loading...",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -14,8 +14,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Jan Aushadhi Sarthak',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
+        // Add responsive design considerations
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: const Splashscreen(),
       debugShowCheckedModeBanner: false,
