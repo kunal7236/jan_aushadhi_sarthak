@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'services/janaushadhi_api_service.dart';
+import 'store_locator_page.dart';
 
 class MedicineSearchPage extends StatefulWidget {
   final List<String>? initialMedicines;
@@ -454,13 +455,11 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                                               Expanded(
                                                 child: OutlinedButton.icon(
                                                   onPressed: () {
-                                                    // TODO: Find nearby Jan Aushadhi stores
-                                                    ScaffoldMessenger.of(
-                                                            context)
-                                                        .showSnackBar(
-                                                      const SnackBar(
-                                                        content: Text(
-                                                            "Store locator coming soon!"),
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            const StoreLocatorPage(),
                                                       ),
                                                     );
                                                   },

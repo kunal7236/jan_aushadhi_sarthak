@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import '../models/medicine_model.dart';
+import 'kendra_api_service.dart';
 
 class PrescriptionParser {
   static final _textRecognizer = TextRecognizer();
@@ -353,29 +354,103 @@ class MedicineDatabase {
     double? longitude,
     int radius = 10, // km
   }) async {
-    // Simulate location-based store search
-    await Future.delayed(const Duration(milliseconds: 800));
+    // For now, return empty list since we don't have location-based search
+    // User should use findStoresByPincode or findStoresByLocation instead
+    return [];
+  }
 
-    // TODO: Replace with actual store locator API
-    return [
-      JanAushadhiStore(
-        name: "Jan Aushadhi Store - Central Plaza",
-        address: "123 Main Street, City Center",
-        phone: "+91 98765 43210",
-        distance: 2.5,
-      ),
-      JanAushadhiStore(
-        name: "Jan Aushadhi Medical Store",
-        address: "456 Health Avenue, Medical District",
-        phone: "+91 87654 32109",
-        distance: 4.2,
-      ),
-      JanAushadhiStore(
-        name: "Generic Medicine Center",
-        address: "789 Wellness Road, Healthcare Hub",
-        phone: "+91 76543 21098",
-        distance: 6.8,
-      ),
-    ];
+  // Find stores by pincode using Kendra API
+  static Future<List<JanAushadhiStore>> findStoresByPincode(
+      String pincode) async {
+    try {
+      final result = await KendraApiService.getKendrasByPincode(pincode);
+
+      if (result.success) {
+        return result.kendras
+            .map((kendra) => JanAushadhiStore(
+                  name: kendra.cleanName,
+                  address: kendra.address,
+                  phone: kendra.formattedContact,
+                  // Distance not available from API, setting to null
+                  distance: null,
+                  availableMedicines: [], // Not available from this API
+                ))
+            .toList();
+      } else {
+        print('Error finding stores by pincode: ${result.error}');
+        return [];
+      }
+    } catch (e) {
+      print('Exception in findStoresByPincode: $e');
+      return [];
+    }
+  }
+
+  // Find stores by state and district using Kendra API
+  static Future<List<JanAushadhiStore>> findStoresByLocation({
+    required String state,
+    required String district,
+  }) async {
+    try {
+      final result = await KendraApiService.getKendrasByLocation(
+        state: state,
+        district: district,
+      );
+
+      if (result.success) {
+        return result.kendras
+            .map((kendra) => JanAushadhiStore(
+                  name: kendra.cleanName,
+                  address: kendra.address,
+                  phone: kendra.formattedContact,
+                  // Distance not available from API, setting to null
+                  distance: null,
+                  availableMedicines: [], // Not available from this API
+                ))
+            .toList();
+      } else {
+        print('Error finding stores by location: ${result.error}');
+        return [];
+      }
+    } catch (e) {
+      print('Exception in findStoresByLocation: $e');
+      return [];
+    }
+  }
+
+  // Find store by Kendra code using Kendra API
+  static Future<JanAushadhiStore?> findStoreByKendraCode(
+      String kendraCode) async {
+    try {
+      final result = await KendraApiService.getKendraByCode(kendraCode);
+
+      if (result.success && result.kendras.isNotEmpty) {
+        final kendra = result.kendras.first;
+        return JanAushadhiStore(
+          name: kendra.cleanName,
+          address: kendra.address,
+          phone: kendra.formattedContact,
+          distance: null, // Not available from API
+          availableMedicines: [], // Not available from this API
+        );
+      } else {
+        print('Error finding store by Kendra code: ${result.error}');
+        return null;
+      }
+    } catch (e) {
+      print('Exception in findStoreByKendraCode: $e');
+      return null;
+    }
+  }
+
+  // Check Kendra API status
+  static Future<bool> isKendraApiLive() async {
+    try {
+      final status = await KendraApiService.checkStatus();
+      return status.isLive;
+    } catch (e) {
+      print('Exception checking Kendra API status: $e');
+      return false;
+    }
   }
 }

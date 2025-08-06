@@ -43,9 +43,14 @@ dependencies:
   # HTTP requests for API calls
   http: ^1.2.0
 
+  # URL launcher for phone calls and directions
+  url_launcher: ^6.2.0
+
   # Future additions for enhanced functionality
   # google_mlkit_language_id: ^0.10.0  # Language detection
-  # pdf_text: ^0.2.1                   # PDF text extractiondev_dependencies:
+  # pdf_text: ^0.2.1                   # PDF text extraction
+
+dev_dependencies:
   flutter_test:
     sdk: flutter
 
