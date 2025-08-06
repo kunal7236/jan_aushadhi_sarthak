@@ -1,200 +1,208 @@
-# jan_aushadhi_sarthak
-
-an app to find generic medicine
-
-## Getting Started
-
 # Jan Aushadhi Sarthak
 
-A Flutter mobile application that helps patients find generic medicine alternatives from Jan Aushadhi stores by parsing medical prescriptions.
+A comprehensive Flutter mobile application that helps patients find generic medicine alternatives from Jan Aushadhi stores by parsing medical prescriptions using advanced OCR technology.
 
-## Features
+## 📺 Demo Video
 
-### 🔍 Prescription Parsing
+[![Jan Aushadhi Sarthak Demo](https://img.youtube.com/vi/bdGntc3mU3g/0.jpg)](https://youtu.be/bdGntc3mU3g)
 
-- Upload prescription images (JPG, PNG, JPEG) or PDF files
-- Extract medicine names using OCR technology
-- User verification and editing of extracted medicines
+🎥 **Watch the full demo**: [https://youtu.be/bdGntc3mU3g](https://youtu.be/bdGntc3mU3g)
 
-### 💊 Medicine Database
+## ✨ Currently Available Features
 
-- Find generic alternatives for commercial medicines
-- Check availability in Jan Aushadhi stores
-- Compare prices between branded and generic medicines
-- Calculate potential savings
+### � **Prescription Processing**
 
-### 🏪 Store Locator
+- ✅ **Image & PDF Upload**: Support for JPG, PNG, JPEG, and PDF files
+- ✅ **Advanced OCR Integration**: Real Google ML Kit Text Recognition v0.13.0
+- ✅ **Smart Medicine Extraction**: Automatic extraction of medicine names from prescriptions
+- ✅ **User Verification System**: Manual editing and verification of extracted medicines
+- ✅ **Responsive UI**: SingleChildScrollView with keyboard overflow protection
 
-- Find nearby Jan Aushadhi stores
-- Get contact information and directions
-- Check medicine availability at specific stores
+### � **Medicine Search & Database**
 
-### 📱 User-Friendly Interface
+- ✅ **Real Jan Aushadhi API Integration**: Live medicine database search
+- ✅ **Manual Search Control**: User-controlled prescription medicine searching
+- ✅ **Smart 404 Handling**: User-friendly "not available" messages instead of error codes
+- ✅ **Visual Search Progress**: Color-coded chips showing search results
+  - 🟢 Green: Medicine found in Jan Aushadhi stores
+  - 🔴 Red: Medicine not available
+  - 🟠 Orange: Currently being searched
+  - 🔵 Blue: Not searched yet
+- ✅ **Detailed Medicine Information**: Drug codes, generic names, unit sizes, and MRP
+- ✅ **Search Results Summary**: Found vs not available count
 
-- Clean, intuitive design
-- Step-by-step workflow
-- Real-time processing feedback
-- Error handling and validation
+### 🏪 **Store Locator & Navigation**
 
-## Project Structure
+- ✅ **Comprehensive Store Search**: Search by pincode, location name, or Kendra code
+- ✅ **Real Kendra API Integration**: Live Jan Aushadhi store database
+- ✅ **Smart Address Enhancement**: Combines address, pincode, district, and state
+- ✅ **Call Functionality**: Direct phone dialer integration with proper permissions
+- ✅ **Google Maps Integration**:
+  - Get directions with fallback support
+  - Start navigation with geo URI
+  - Show location on maps
+- ✅ **Flexible Address Validation**: Works with various Indian address formats
+- ✅ **User Feedback System**: Loading states, error handling, and success messages
 
-```
-lib/
-├── main.dart                    # App entry point
-├── splashscreen.dart           # Initial splash screen
-├── filepicker_page.dart        # Prescription upload page
-├── medicine_extraction_page.dart # Medicine verification page
-├── models/
-│   └── medicine_model.dart     # Data models
-└── services/
-    └── prescription_service.dart # OCR and database services
-```
+### 🎨 **User Experience**
 
-## Current Status
+- ✅ **Medical-Themed UI**: Green color scheme with healthcare iconography
+- ✅ **Error Handling**: Comprehensive API error handling with user-friendly messages
+- ✅ **Loading States**: Visual feedback during API calls and processing
+- ✅ **Responsive Design**: Adapts to different screen sizes and orientations
+- ✅ **Accessibility**: Clear icons, readable fonts, and intuitive navigation
 
-### ✅ Completed
+## 🏗️ Technical Architecture
 
-- [x] Splash screen with app branding
-- [x] File picker for prescription upload
-- [x] Medicine extraction and verification UI
-- [x] Basic navigation flow
-- [x] Data models and service structure
-
-### 🚧 In Progress
-
-- [ ] OCR integration for image processing
-- [ ] PDF text extraction
-- [ ] Medicine database integration
-- [ ] Jan Aushadhi API integration
-
-### 📋 Planned Features
-
-- [ ] Generic alternatives search
-- [ ] Price comparison
-- [ ] Store locator with maps
-- [ ] Savings calculator
-- [ ] User preferences and history
-- [ ] Offline mode support
-
-## Technical Implementation
-
-### OCR Integration Options
-
-- **Google ML Vision**: For image text recognition
-- **Firebase ML Kit**: Cloud-based OCR
-- **Tesseract OCR**: Open-source OCR engine
-- **Custom API**: Backend OCR service
-
-### Database Options
-
-- **Local SQLite**: For offline medicine database
-- **Firebase Firestore**: Real-time cloud database
-- **REST API**: Custom backend integration
-- **CSV/JSON**: Static data files
-
-### Jan Aushadhi Integration
-
-- Official Jan Aushadhi API (if available)
-- Web scraping (with appropriate permissions)
-- Manual database creation
-- Government data sources
-
-## Getting Started
-
-### Prerequisites
-
-- Flutter SDK (latest stable version)
-- Android Studio / VS Code
-- Android SDK for Android development
-- Xcode for iOS development (Mac only)
-
-### Installation
-
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   flutter pub get
-   ```
-3. Run the app:
-   ```bash
-   flutter run
-   ```
-
-### Dependencies
+### **Dependencies & Integrations**
 
 ```yaml
 dependencies:
-  flutter:
-    sdk: flutter
-  file_picker: ^10.2.0
-  cupertino_icons: ^1.0.8
-
-  # Future dependencies for OCR and database
-  # google_ml_vision: ^0.0.13
-  # firebase_ml_vision: ^0.12.0
-  # sqflite: ^2.3.0
-  # http: ^1.1.0
+  flutter: sdk
+  file_picker: ^10.2.0 # File upload functionality
+  google_mlkit_text_recognition: ^0.13.0 # OCR processing
+  http: ^1.1.0 # API communication
+  url_launcher: ^6.2.0 # Phone calls & navigation
+  cupertino_icons: ^1.0.8 # iOS-style icons
 ```
 
-## Screenshots
+### **API Integrations**
 
-[Add screenshots here showing the app workflow]
+- **Jan Aushadhi Medicine API**: `https://medicine-api-m176.onrender.com`
+- **Kendra Store Locator API**: `https://kendra-api.onrender.com`
+- **Google Maps Integration**: Directions, navigation, and location display
 
-## Contributing
+### **Project Structure**
+
+```
+lib/
+├── main.dart                           # App entry point
+├── splashscreen.dart                  # Splash screen with branding
+├── filepicker_page.dart               # Prescription upload interface
+├── medicine_extraction_page.dart      # OCR processing & verification
+├── medicine_search_page.dart          # Jan Aushadhi medicine search
+├── store_locator_page.dart           # Store finder with call/directions
+├── services/
+│   ├── janaushadhi_api_service.dart  # Medicine database API
+│   └── kendra_api_service.dart       # Store locator API
+└── utils/
+    ├── phone_utils.dart              # Phone call functionality
+    ├── directions_utils.dart         # Google Maps integration
+    └── action_utils.dart             # Centralized action handling
+```
+
+## 🚀 Future Planned Features
+
+### � **Enhanced Medicine Management**
+
+- [ ] Medicine cart/wishlist functionality
+- [ ] Medicine alternatives suggestions
+- [ ] Medicine interaction warnings
+
+### � **Cost Analysis**
+
+- [ ] Savings calculator (branded vs generic)
+
+### 🗺️ **Advanced Location Features**
+
+- [ ] Store ratings and reviews
+- [ ] Real-time store hours
+- [ ] Route optimization for multiple stores
+
+### 👤 **User Profile & History**
+
+- [ ] User account system
+- [ ] Search history
+- [ ] Prescription history
+
+### 🔧 **Advanced Features**
+
+- [ ] Offline mode support
+- [ ] Multi-language support
+- [ ] Voice search capability
+- [ ] Barcode scanning
+
+### 🤖 **AI & ML Enhancements**
+
+- [ ] Improved OCR accuracy with custom models
+- [ ] Medicine name auto-correction
+- [ ] Prescription validity checking
+- [ ] Doctor handwriting recognition
+
+## 📱 Getting Started
+
+### Prerequisites
+
+- Flutter SDK (3.0 or higher)
+- Android Studio / VS Code
+- Android SDK (API level 21+)
+- Internet connection for API services
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/kunal7236/jan_aushadhi_sarthak.git
+   cd jan_aushadhi_sarthak
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   flutter pub get
+   ```
+
+3. **Run the application**
+   ```bash
+   flutter run --debug
+   ```
+
+### Android Permissions
+
+The app requires the following permissions:
+
+- `INTERNET`: For API communications
+- `CALL_PHONE`: For direct calling functionality
+- `READ_EXTERNAL_STORAGE`: For file picker access
+
+## 🎯 Usage Workflow
+
+1. **Upload Prescription**: Take photo or select file (PDF/Image)
+2. **OCR Processing**: Automatic medicine name extraction
+3. **Verify Results**: Edit and confirm extracted medicines
+4. **Search Medicines**: Manual control over prescription medicine search
+5. **Find Stores**: Locate nearby Jan Aushadhi stores
+6. **Get Directions**: Call stores or navigate using Google Maps
+
+## 🌟 Key Achievements
+
+- ✅ **Real OCR Integration**: Successfully implemented Google ML Kit
+- ✅ **Live API Integration**: Connected to actual Jan Aushadhi databases
+- ✅ **Complete User Journey**: From prescription to store navigation
+- ✅ **Cross-Platform**: Works on Android with iOS support ready
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes and test thoroughly
+4. Commit your changes (`git commit -m 'Add amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
 
-## Roadmap
+## 🎉 Impact & Vision
 
-### Phase 1: Core Functionality
+**Jan Aushadhi Sarthak** aims to:
 
-- Complete OCR integration
-- Basic medicine database
-- Generic name lookup
-
-### Phase 2: Enhanced Features
-
-- Jan Aushadhi store integration
-- Price comparison
-- Savings calculator
-
-### Phase 3: Advanced Features
-
-- Store locator with maps
-- User accounts and history
-- Push notifications
-- Offline mode
-
-## Impact
-
-This app aims to:
-
-- **Reduce Healthcare Costs**: Help patients save money on medicines
-- **Increase Accessibility**: Make generic medicines more discoverable
-- **Support Government Initiative**: Promote Jan Aushadhi scheme
-- **Improve Healthcare**: Make medicines more affordable for all
-
-## License
-
-[Add your license here]
-
-## Contact
-
-[Add your contact information]
+- **Reduce Healthcare Costs**: Save 50-90% on medicine expenses
+- **Increase Accessibility**: Make generic medicines easily discoverable
+- **Support Government Initiative**: Promote the Jan Aushadhi scheme
+- **Bridge Technology Gap**: Bring digital solutions to healthcare
+- **Empower Patients**: Provide tools for informed healthcare decisions
 
 ---
 
-**Jan Aushadhi Sarthak** - Making healthcare affordable through technology.
+**Jan Aushadhi Sarthak** - Making healthcare affordable through technology 💊📱
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+_Built with ❤️ using Flutter_
