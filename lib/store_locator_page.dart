@@ -503,12 +503,34 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                                               const SizedBox(width: 8),
                                               Expanded(
                                                 child: OutlinedButton.icon(
-                                                  onPressed: () => ActionUtils
-                                                      .handleDirections(
-                                                    context,
-                                                    kendra.address,
-                                                    storeName: kendra.cleanName,
-                                                  ),
+                                                  onPressed: () {
+                                                    // Construct a more complete address for better navigation
+                                                    String fullAddress =
+                                                        kendra.address;
+                                                    if (kendra
+                                                        .pinCode.isNotEmpty) {
+                                                      fullAddress +=
+                                                          ', ${kendra.pinCode}';
+                                                    }
+                                                    if (kendra.districtName
+                                                        .isNotEmpty) {
+                                                      fullAddress +=
+                                                          ', ${kendra.districtName}';
+                                                    }
+                                                    if (kendra
+                                                        .stateName.isNotEmpty) {
+                                                      fullAddress +=
+                                                          ', ${kendra.stateName}';
+                                                    }
+
+                                                    ActionUtils
+                                                        .handleDirections(
+                                                      context,
+                                                      fullAddress,
+                                                      storeName:
+                                                          kendra.cleanName,
+                                                    );
+                                                  },
                                                   icon: const Icon(
                                                       Icons.directions,
                                                       size: 16),
@@ -531,12 +553,31 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                                           SizedBox(
                                             width: double.infinity,
                                             child: ElevatedButton.icon(
-                                              onPressed: () =>
-                                                  ActionUtils.handleNavigation(
-                                                context,
-                                                kendra.address,
-                                                storeName: kendra.cleanName,
-                                              ),
+                                              onPressed: () {
+                                                // Construct a more complete address for better navigation
+                                                String fullAddress =
+                                                    kendra.address;
+                                                if (kendra.pinCode.isNotEmpty) {
+                                                  fullAddress +=
+                                                      ', ${kendra.pinCode}';
+                                                }
+                                                if (kendra
+                                                    .districtName.isNotEmpty) {
+                                                  fullAddress +=
+                                                      ', ${kendra.districtName}';
+                                                }
+                                                if (kendra
+                                                    .stateName.isNotEmpty) {
+                                                  fullAddress +=
+                                                      ', ${kendra.stateName}';
+                                                }
+
+                                                ActionUtils.handleNavigation(
+                                                  context,
+                                                  fullAddress,
+                                                  storeName: kendra.cleanName,
+                                                );
+                                              },
                                               icon: const Icon(Icons.navigation,
                                                   size: 16),
                                               label: const Text(

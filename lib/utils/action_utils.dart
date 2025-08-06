@@ -71,13 +71,10 @@ class ActionUtils {
   /// [context] is required for showing snackbars
   /// [address] is the destination address
   /// [storeName] is optional store name for better user feedback
-  /// [latitude] and [longitude] are optional coordinates for better accuracy
   static Future<void> handleDirections(
     BuildContext context,
     String address, {
     String? storeName,
-    double? latitude,
-    double? longitude,
   }) async {
     try {
       // Validate address first
@@ -114,16 +111,12 @@ class ActionUtils {
       // Try to get directions first
       bool success = await DirectionsUtils.getDirections(
         address: address,
-        latitude: latitude,
-        longitude: longitude,
       );
 
       if (!success && context.mounted) {
         // Fallback: try to show location on map
         success = await DirectionsUtils.showOnMap(
           address: address,
-          latitude: latitude,
-          longitude: longitude,
         );
 
         if (!success && context.mounted) {
@@ -148,13 +141,10 @@ class ActionUtils {
   /// [context] is required for showing snackbars
   /// [address] is the destination address
   /// [storeName] is optional store name for better user feedback
-  /// [latitude] and [longitude] are optional coordinates for better accuracy
   static Future<void> handleNavigation(
     BuildContext context,
     String address, {
     String? storeName,
-    double? latitude,
-    double? longitude,
   }) async {
     try {
       // Validate address first
@@ -191,8 +181,6 @@ class ActionUtils {
       // Start navigation
       final success = await DirectionsUtils.startNavigation(
         address: address,
-        latitude: latitude,
-        longitude: longitude,
       );
 
       if (!success && context.mounted) {

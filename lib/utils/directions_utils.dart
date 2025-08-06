@@ -4,41 +4,22 @@ class DirectionsUtils {
   /// Opens Google Maps with directions to the specified location
   ///
   /// [address] is the full address string
-  /// [latitude] and [longitude] are optional coordinates for more precise location
   /// Returns true if Google Maps was successfully opened, false otherwise
   static Future<bool> getDirections({
     required String address,
-    double? latitude,
-    double? longitude,
   }) async {
     try {
-      Uri mapsUri;
-
-      if (latitude != null && longitude != null) {
-        // Use coordinates if available for more accurate directions
-        mapsUri = Uri(
-          scheme: 'https',
-          host: 'www.google.com',
-          path: '/maps/dir/',
-          queryParameters: {
-            'api': '1',
-            'destination': '$latitude,$longitude',
-            'travelmode': 'driving',
-          },
-        );
-      } else {
-        // Use address string for directions
-        mapsUri = Uri(
-          scheme: 'https',
-          host: 'www.google.com',
-          path: '/maps/dir/',
-          queryParameters: {
-            'api': '1',
-            'destination': address,
-            'travelmode': 'driving',
-          },
-        );
-      }
+      // Use address string for directions
+      final mapsUri = Uri(
+        scheme: 'https',
+        host: 'www.google.com',
+        path: '/maps/dir/',
+        queryParameters: {
+          'api': '1',
+          'destination': formatAddress(address),
+          'travelmode': 'driving',
+        },
+      );
 
       print('Attempting to open Google Maps with: $mapsUri');
 
@@ -151,8 +132,6 @@ class DirectionsUtils {
         print('Geo URI failed, falling back to Google Maps');
         return await getDirections(
           address: address,
-          latitude: latitude,
-          longitude: longitude,
         );
       }
     } catch (e) {
@@ -177,29 +156,15 @@ class DirectionsUtils {
   ///
   /// Returns true if the address contains enough information for mapping
   static bool isValidAddress(String address) {
-    if (address.trim().isEmpty || address.length < 10) {
+    if (address.trim().isEmpty || address.length < 5) {
       return false;
     }
 
-    // Check if address contains some basic components
-    String lowerAddress = address.toLowerCase();
+    // Much more lenient validation - just check if we have some text
+    String trimmedAddress = address.trim();
 
-    // Should have some location indicators
-    bool hasLocationInfo = lowerAddress.contains('road') ||
-        lowerAddress.contains('street') ||
-        lowerAddress.contains('avenue') ||
-        lowerAddress.contains('nagar') ||
-        lowerAddress.contains('colony') ||
-        lowerAddress.contains('area') ||
-        lowerAddress.contains('sector') ||
-        lowerAddress.contains('block') ||
-        lowerAddress.contains('plot') ||
-        lowerAddress.contains('house') ||
-        lowerAddress.contains('shop');
-
-    // Should have some numbers (house/shop/plot numbers)
-    bool hasNumbers = address.contains(RegExp(r'\d'));
-
-    return hasLocationInfo && hasNumbers;
+    // As long as the address has some meaningful content, allow it
+    // Google Maps is smart enough to handle various address formats
+    return trimmedAddress.isNotEmpty && trimmedAddress.length >= 5;
   }
 }
