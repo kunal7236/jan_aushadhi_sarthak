@@ -19,27 +19,50 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
   String? errorMessage;
   String? lastUpdated;
 
+  // New variables for prescription medicine control
+  List<String>? prescriptionMedicines;
+  int currentMedicineIndex = 0;
+  bool isSearchingPrescription = false;
+  Map<String, bool> medicineSearchResults =
+      {}; // Track search results for each medicine
+
   @override
   void initState() {
     super.initState();
     _checkApiStatus();
 
-    // If initial medicines are provided, search for them automatically
+    // Store prescription medicines but don't search automatically
     if (widget.initialMedicines != null &&
         widget.initialMedicines!.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _searchInitialMedicines();
-      });
+      prescriptionMedicines = List.from(widget.initialMedicines!);
+      // Set the first medicine in the search field
+      _searchController.text = prescriptionMedicines![0];
     }
   }
 
-  Future<void> _searchInitialMedicines() async {
-    for (String medicine in widget.initialMedicines!) {
-      _searchController.text = medicine;
-      await _searchMedicines();
-      // Small delay between searches to avoid overwhelming the API
-      await Future.delayed(const Duration(milliseconds: 500));
+  // Method to search the next medicine from prescription
+  void _searchNextPrescriptionMedicine() async {
+    if (prescriptionMedicines == null ||
+        currentMedicineIndex >= prescriptionMedicines!.length) {
+      return;
     }
+
+    setState(() {
+      isSearchingPrescription = true;
+    });
+
+    String currentMedicine = prescriptionMedicines![currentMedicineIndex];
+    _searchController.text = currentMedicine;
+    await _searchMedicines();
+
+    // Store the search result for this medicine
+    bool medicineFound = searchResults.isNotEmpty;
+    medicineSearchResults[currentMedicine] = medicineFound;
+
+    setState(() {
+      currentMedicineIndex++;
+      isSearchingPrescription = false;
+    });
   }
 
   Future<void> _checkApiStatus() async {
@@ -93,7 +116,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
           // Show message if no results found but API is working
           if (result.medicines.isEmpty) {
             errorMessage =
-                "No medicines found for '$query'. Try a different search term.";
+                "No medicines found for '$query'. Try another Medicine/Check the Spelling!";
           }
         } else {
           // Only set API down if it's a connection issue, not just empty results
@@ -131,8 +154,8 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
           child: Column(
             children: [
               // Initial medicines from prescription (if any)
-              if (widget.initialMedicines != null &&
-                  widget.initialMedicines!.isNotEmpty) ...[
+              if (prescriptionMedicines != null &&
+                  prescriptionMedicines!.isNotEmpty) ...[
                 Card(
                   color: Colors.blue[50],
                   child: Padding(
@@ -145,37 +168,185 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                             Icon(Icons.medical_services,
                                 color: Colors.blue[700]),
                             const SizedBox(width: 8),
-                            Text(
-                              "Medicines from your prescription:",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue[700],
+                            Expanded(
+                              child: Text(
+                                "Medicines from your prescription:",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue[700],
+                                ),
+                              ),
+                            ),
+                            // Progress indicator
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.blue[200],
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                "${currentMedicineIndex}/${prescriptionMedicines!.length}",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue[800],
+                                ),
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
+                        // Currently searching medicine highlight
+                        if (currentMedicineIndex <
+                            prescriptionMedicines!.length)
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.green[100],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.green[300]!),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.search,
+                                    color: Colors.green[700], size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  "Current: ${prescriptionMedicines![currentMedicineIndex]}",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.green[800],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        const SizedBox(height: 12),
                         Wrap(
                           spacing: 8,
                           runSpacing: 4,
-                          children: widget.initialMedicines!
-                              .map((medicine) => Chip(
-                                    label: Text(medicine),
-                                    backgroundColor: Colors.blue[100],
-                                    onDeleted: null,
-                                  ))
-                              .toList(),
+                          children: prescriptionMedicines!
+                              .asMap()
+                              .entries
+                              .map((entry) {
+                            int index = entry.key;
+                            String medicine = entry.value;
+                            bool isSearched = index < currentMedicineIndex;
+                            bool isCurrent = index == currentMedicineIndex;
+                            bool? wasFound = medicineSearchResults[medicine];
+
+                            Color chipColor;
+                            Widget? avatar;
+
+                            if (isSearched && wasFound != null) {
+                              // Medicine has been searched
+                              if (wasFound) {
+                                // Found - green
+                                chipColor = Colors.green[100]!;
+                                avatar = Icon(Icons.check,
+                                    size: 16, color: Colors.green[700]);
+                              } else {
+                                // Not found - red
+                                chipColor = Colors.red[100]!;
+                                avatar = Icon(Icons.close,
+                                    size: 16, color: Colors.red[700]);
+                              }
+                            } else if (isCurrent) {
+                              // Currently being searched - orange
+                              chipColor = Colors.orange[100]!;
+                              avatar = Icon(Icons.search,
+                                  size: 16, color: Colors.orange[700]);
+                            } else {
+                              // Not searched yet - blue
+                              chipColor = Colors.blue[100]!;
+                              avatar = null;
+                            }
+
+                            return Chip(
+                              label: Text(medicine),
+                              backgroundColor: chipColor,
+                              avatar: avatar,
+                            );
+                          }).toList(),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "Searching for these medicines automatically...",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                            fontStyle: FontStyle.italic,
+                        const SizedBox(height: 12),
+                        // Search next medicine button
+                        if (currentMedicineIndex <
+                            prescriptionMedicines!.length)
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: isSearchingPrescription || isLoading
+                                  ? null
+                                  : _searchNextPrescriptionMedicine,
+                              icon: isSearchingPrescription
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
+                                      ),
+                                    )
+                                  : const Icon(Icons.search),
+                              label: Text(
+                                isSearchingPrescription
+                                    ? "Searching..."
+                                    : currentMedicineIndex == 0
+                                        ? "Start Searching Prescription Medicines"
+                                        : "Search Next Medicine",
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue[600],
+                                foregroundColor: Colors.white,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                            ),
+                          )
+                        else
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.green[50],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.green[200]!),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.check_circle,
+                                        color: Colors.green[700]),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      "All prescription medicines searched!",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.green[700],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  "Found: ${medicineSearchResults.values.where((found) => found).length}, "
+                                  "Not Available: ${medicineSearchResults.values.where((found) => !found).length}",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -251,14 +422,29 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
               // API Status or Error
               if (errorMessage != null) ...[
                 Card(
-                  color: isApiDown ? Colors.red[50] : Colors.orange[50],
+                  color: isApiDown
+                      ? Colors.red[50]
+                      : errorMessage!
+                              .contains("not available in Jan Aushadhi stores")
+                          ? Colors.blue[50]
+                          : Colors.orange[50],
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
                         Icon(
-                          isApiDown ? Icons.error : Icons.info_outline,
-                          color: isApiDown ? Colors.red : Colors.orange,
+                          isApiDown
+                              ? Icons.error
+                              : errorMessage!.contains(
+                                      "not available in Jan Aushadhi stores")
+                                  ? Icons.info
+                                  : Icons.info_outline,
+                          color: isApiDown
+                              ? Colors.red
+                              : errorMessage!.contains(
+                                      "not available in Jan Aushadhi stores")
+                                  ? Colors.blue[700]
+                                  : Colors.orange,
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -268,12 +454,18 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                               Text(
                                 isApiDown
                                     ? "Service Unavailable"
-                                    : "Search Results",
+                                    : errorMessage!.contains(
+                                            "not available in Jan Aushadhi stores")
+                                        ? "Medicine Not Available"
+                                        : "Search Results",
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   color: isApiDown
                                       ? Colors.red
-                                      : Colors.orange[800],
+                                      : errorMessage!.contains(
+                                              "not available in Jan Aushadhi stores")
+                                          ? Colors.blue[700]
+                                          : Colors.orange[800],
                                 ),
                               ),
                               Text(

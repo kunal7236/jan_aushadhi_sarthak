@@ -67,7 +67,8 @@ class JanAushadhiApiService {
               medicines: [],
               updatedAt: data['updated_at'] ?? '',
               success: true,
-              error: 'No medicines found matching "$query"',
+              error:
+                  'Medicine "$query" is not available in Jan Aushadhi stores',
             );
           }
 
@@ -85,6 +86,14 @@ class JanAushadhiApiService {
             error: 'Error processing API response: $e',
           );
         }
+      } else if (response.statusCode == 404) {
+        // Handle 404 specifically - medicine not found in database
+        return JanAushadhiSearchResult(
+          medicines: [],
+          updatedAt: '',
+          success: true,
+          error: 'Medicine "$query" is not available in Jan Aushadhi stores',
+        );
       } else {
         return JanAushadhiSearchResult(
           medicines: [],
