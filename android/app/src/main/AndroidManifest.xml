@@ -32,7 +32,7 @@
     </queries>
     
     <application
-        android:label="jan_aushadhi_sarthak"
+        android:label="Jan Aushadhi Sarthak"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
