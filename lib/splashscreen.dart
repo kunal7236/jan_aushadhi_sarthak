@@ -32,65 +32,70 @@ class _SplashscreenState extends State<Splashscreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        // Add SafeArea for better compatibility
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0), // Add padding for safety
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  height: finalImageSize,
-                  width: finalImageSize,
-                  child: Image.asset(
-                    "assets/images/splash.jpg",
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: finalImageSize,
-                        width: finalImageSize,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.image_not_supported,
-                              size:
-                                  finalImageSize * 0.16, // Responsive icon size
-                              color: Colors.grey,
-                            ),
-                            SizedBox(height: finalImageSize * 0.03),
-                            Text(
-                              "Splash Image\nNot Found",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
+      body: SizedBox(
+        width: double.infinity,
+        height: double.infinity, // Force full screen utilization
+        child: SafeArea(
+          // Add SafeArea for better compatibility
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0), // Add padding for safety
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: finalImageSize,
+                    width: finalImageSize,
+                    child: Image.asset(
+                      "assets/images/splash.jpg",
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: finalImageSize,
+                          width: finalImageSize,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.image_not_supported,
+                                size: finalImageSize *
+                                    0.16, // Responsive icon size
                                 color: Colors.grey,
-                                fontSize:
-                                    screenSize.width * 0.04, // Responsive text
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                              SizedBox(height: finalImageSize * 0.03),
+                              Text(
+                                "Splash Image\nNot Found",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: screenSize.width *
+                                      0.04, // Responsive text
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-                SizedBox(
-                    height: screenSize.height * 0.03), // Responsive spacing
-                const CircularProgressIndicator(),
-                SizedBox(height: screenSize.height * 0.02),
-                Text(
-                  "Loading...",
-                  style: TextStyle(
-                    fontSize: screenSize.width * 0.045, // Responsive text size
-                    fontWeight: FontWeight.w500,
+                  SizedBox(
+                      height: screenSize.height * 0.03), // Responsive spacing
+                  const CircularProgressIndicator(),
+                  SizedBox(height: screenSize.height * 0.02),
+                  Text(
+                    "Loading...",
+                    style: TextStyle(
+                      fontSize:
+                          screenSize.width * 0.045, // Responsive text size
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

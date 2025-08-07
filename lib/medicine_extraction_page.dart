@@ -101,6 +101,9 @@ class _MedicineExtractionPageState extends State<MedicineExtractionPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get screen dimensions for responsive design
+    final screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Extracted Medicines"),
@@ -110,6 +113,8 @@ class _MedicineExtractionPageState extends State<MedicineExtractionPage> {
       body: Container(
         padding: const EdgeInsets.all(16),
         color: Colors.green[50],
+        width: double.infinity,
+        height: screenSize.height, // Force full height utilization
         child: Column(
           children: [
             // Header info

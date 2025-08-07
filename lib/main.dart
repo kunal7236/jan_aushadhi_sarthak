@@ -18,6 +18,15 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         // Add responsive design considerations
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        // Ensure app uses full screen height on all devices
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          titleTextStyle: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
       home: const Splashscreen(),
       debugShowCheckedModeBanner: false,
