@@ -78,21 +78,19 @@ A comprehensive Flutter mobile application that helps patients find generic medi
 
 **Naming Convention**: `Jan-Aushadhi-Sarthak-v1.0.0-[architecture]-release.apk`
 
-- `Jan-Aushadhi-Sarthak-v1.0.0-arm64-release.apk` - For modern 64-bit ARM devices (18.8 MB)
-  - **Best for**: Most modern Android phones (2019+), Samsung Galaxy, Google Pixel, OnePlus, etc.
-  - **Architecture**: ARM64-v8a (64-bit ARM)
-  
-- `Jan-Aushadhi-Sarthak-v1.0.0-arm32-release.apk` - For older 32-bit ARM devices (17.5 MB)  
-  - **Best for**: Older Android phones and budget devices
-  - **Architecture**: ARMv7a (32-bit ARM)
-  
-- `Jan-Aushadhi-Sarthak-v1.0.0-x86_64-release.apk` - For x86_64 emulators/devices (19.0 MB)
-  - **Best for**: Android emulators on PC, Intel-based tablets
-  - **Architecture**: x86_64 (64-bit Intel/AMD)
-  
-- `Jan-Aushadhi-Sarthak-v1.0.0-universal-release.apk` - Universal APK (all architectures) (44.3 MB)
-  - **Best for**: When unsure about device architecture, includes all CPU types
-  - **Architecture**: Universal (ARM32, ARM64, x86, x86_64)
+| APK Filename                                        | Size    | Architecture                  | Best For                               | Device Examples                                               |
+| --------------------------------------------------- | ------- | ----------------------------- | -------------------------------------- | ------------------------------------------------------------- |
+| `Jan-Aushadhi-Sarthak-v1.0.0-arm64-release.apk`     | 18.8 MB | ARM64-v8a (64-bit ARM)        | Most modern Android phones (2019+)     | Samsung Galaxy S9+, Google Pixel 3+, OnePlus 6+, Xiaomi Mi 8+ |
+| `Jan-Aushadhi-Sarthak-v1.0.0-arm32-release.apk`     | 17.5 MB | ARMv7a (32-bit ARM)           | Older Android phones & budget devices  | Older Samsung, Xiaomi Redmi series, budget phones             |
+| `Jan-Aushadhi-Sarthak-v1.0.0-x86_64-release.apk`    | 19.0 MB | x86_64 (64-bit Intel/AMD)     | Android emulators on PC, Intel tablets | BlueStacks, Android Studio Emulator, Intel tablets            |
+| `Jan-Aushadhi-Sarthak-v1.0.0-universal-release.apk` | 44.3 MB | Universal (All architectures) | When unsure about device architecture  | Works on all Android devices                                  |
+
+**💡 Quick Selection Guide:**
+
+- **🔥 Recommended**: ARM64 version for most users (smallest & fastest)
+- **📱 Compatibility**: ARM32 for older devices if ARM64 doesn't work
+- **💻 Emulator**: x86_64 for PC emulators
+- **🤔 Unsure**: Universal version (larger but guaranteed compatibility)
 
 ## 🏗️ Technical Architecture
 
@@ -188,16 +186,20 @@ lib/
 **📋 How to Choose the Right APK:**
 
 1. **Check your device architecture** (Settings → About Phone → Processor)
-2. **Download the appropriate APK:**
+2. **Download the appropriate APK** (see table above):
 
-   - **Most Android devices (2019+)**: `Jan-Aushadhi-Sarthak-v1.0.0-arm64-release.apk` (18.8 MB)
-   - **Older/Budget devices**: `Jan-Aushadhi-Sarthak-v1.0.0-arm32-release.apk` (17.5 MB)
-   - **If unsure**: `Jan-Aushadhi-Sarthak-v1.0.0-universal-release.apk` (44.3 MB - works on all devices)
+| Device Type                      | Recommended APK                                     | Size    |
+| -------------------------------- | --------------------------------------------------- | ------- |
+| **Most Android devices (2019+)** | `Jan-Aushadhi-Sarthak-v1.0.0-arm64-release.apk`     | 18.8 MB |
+| **Older/Budget devices**         | `Jan-Aushadhi-Sarthak-v1.0.0-arm32-release.apk`     | 17.5 MB |
+| **Android Emulator**             | `Jan-Aushadhi-Sarthak-v1.0.0-x86_64-release.apk`    | 19.0 MB |
+| **If unsure**                    | `Jan-Aushadhi-Sarthak-v1.0.0-universal-release.apk` | 44.3 MB |
 
 3. **Enable "Install from Unknown Sources"** in Android Settings
 4. **Install the APK** and enjoy the optimized performance
 
 **📱 Quick Device Guide:**
+
 - **Samsung Galaxy S9+, Google Pixel 3+, OnePlus 6+**: Use ARM64 version
 - **Older Samsung, Xiaomi, Oppo devices**: Try ARM32 if ARM64 doesn't work
 - **Android Emulator**: Use x86_64 version
