@@ -21,17 +21,17 @@ class DirectionsUtils {
         },
       );
 
-      print('Attempting to open Google Maps with: $mapsUri');
+      
 
       if (await canLaunchUrl(mapsUri)) {
         await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
         return true;
       } else {
-        print('Cannot launch Google Maps for directions');
+        
         return false;
       }
     } catch (e) {
-      print('Error opening directions: $e');
+      
       return false;
     }
   }
@@ -73,17 +73,17 @@ class DirectionsUtils {
         );
       }
 
-      print('Attempting to open Google Maps location: $mapsUri');
+      
 
       if (await canLaunchUrl(mapsUri)) {
         await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
         return true;
       } else {
-        print('Cannot launch Google Maps to show location');
+        
         return false;
       }
     } catch (e) {
-      print('Error showing location on map: $e');
+      
       return false;
     }
   }
@@ -122,20 +122,20 @@ class DirectionsUtils {
         );
       }
 
-      print('Attempting to start navigation: $navigationUri');
+      
 
       if (await canLaunchUrl(navigationUri)) {
         await launchUrl(navigationUri, mode: LaunchMode.externalApplication);
         return true;
       } else {
         // Fallback to Google Maps directions if geo URI fails
-        print('Geo URI failed, falling back to Google Maps');
+        
         return await getDirections(
           address: address,
         );
       }
     } catch (e) {
-      print('Error starting navigation: $e');
+      
       return false;
     }
   }

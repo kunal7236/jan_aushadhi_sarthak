@@ -20,17 +20,13 @@ class PhoneUtils {
         path: cleanNumber,
       );
 
-      print('Attempting to open dialer with: $cleanNumber');
-
       if (await canLaunchUrl(phoneUri)) {
         await launchUrl(phoneUri);
         return true;
       } else {
-        print('Cannot launch phone dialer for: $cleanNumber');
         return false;
       }
     } catch (e) {
-      print('Error making phone call: $e');
       return false;
     }
   }

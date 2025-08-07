@@ -31,9 +31,9 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
   }
 
   Future<void> _checkApiStatus() async {
-    print('Checking Kendra API status...');
+    
     final status = await KendraApiService.checkStatus();
-    print('Kendra API status: ${status.isLive ? 'LIVE' : 'DOWN'}');
+    
 
     if (mounted) {
       setState(() {

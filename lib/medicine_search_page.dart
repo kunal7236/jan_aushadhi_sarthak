@@ -66,9 +66,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
   }
 
   Future<void> _checkApiStatus() async {
-    print('Checking API status...');
     final isLive = await JanAushadhiApiService.checkStatus();
-    print('API status check result: ${isLive ? 'LIVE' : 'DOWN'}');
 
     if (mounted) {
       setState(() {
@@ -199,7 +197,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
-                                  "${currentMedicineIndex}/${prescriptionMedicines!.length}",
+                                  "$currentMedicineIndex/${prescriptionMedicines!.length}",
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,

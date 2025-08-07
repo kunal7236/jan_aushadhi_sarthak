@@ -21,12 +21,9 @@ class PrescriptionParser {
           String lineText = line.text.trim();
           if (lineText.isNotEmpty) {
             allLines.add(lineText);
-            print('OCR Line: $lineText'); // Debug: see what OCR extracted
           }
         }
       }
-
-      print('Total lines extracted: ${allLines.length}'); // Debug
 
       // Process each line to find medicine names
       for (String line in allLines) {
@@ -42,9 +39,6 @@ class PrescriptionParser {
           ? (extractedMedicines.isNotEmpty ? 0.85 : 0.4)
           : 0.0;
 
-      print(
-          'Final extracted medicines: ${extractedMedicines.map((m) => m.commercialName).toList()}'); // Debug
-
       // If no medicines found, show what was actually extracted
       if (extractedMedicines.isEmpty && allLines.isNotEmpty) {
         // Try to extract any meaningful text as potential medicine names
@@ -58,7 +52,6 @@ class PrescriptionParser {
         prescriptionDate: DateTime.now(),
       );
     } catch (e) {
-      print('OCR Error: $e');
       // Return empty result instead of dummy data
       return PrescriptionParseResult(
         extractedMedicines: [],
@@ -103,7 +96,6 @@ class PrescriptionParser {
 
       if (medicineName.isNotEmpty && medicineName.length > 2) {
         medicines.add(Medicine(commercialName: medicineName));
-        print('Extracted medicine: $medicineName from line: $line'); // Debug
       }
     }
 
@@ -123,8 +115,6 @@ class PrescriptionParser {
         // If word is 4+ characters and looks like a medicine name
         if (cleanWord.length >= 4 && _looksLikeMedicineName(cleanWord)) {
           potentialMedicines.add(Medicine(commercialName: cleanWord));
-          print(
-              'Potential medicine found: $cleanWord from line: $line'); // Debug
         }
       }
     }
@@ -377,11 +367,9 @@ class MedicineDatabase {
                 ))
             .toList();
       } else {
-        print('Error finding stores by pincode: ${result.error}');
         return [];
       }
     } catch (e) {
-      print('Exception in findStoresByPincode: $e');
       return [];
     }
   }
@@ -409,11 +397,9 @@ class MedicineDatabase {
                 ))
             .toList();
       } else {
-        print('Error finding stores by location: ${result.error}');
         return [];
       }
     } catch (e) {
-      print('Exception in findStoresByLocation: $e');
       return [];
     }
   }
@@ -434,11 +420,9 @@ class MedicineDatabase {
           availableMedicines: [], // Not available from this API
         );
       } else {
-        print('Error finding store by Kendra code: ${result.error}');
         return null;
       }
     } catch (e) {
-      print('Exception in findStoreByKendraCode: $e');
       return null;
     }
   }
@@ -449,7 +433,6 @@ class MedicineDatabase {
       final status = await KendraApiService.checkStatus();
       return status.isLive;
     } catch (e) {
-      print('Exception checking Kendra API status: $e');
       return false;
     }
   }

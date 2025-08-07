@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:http/http.dart' as http;
 
 class JanAushadhiApiService {
@@ -23,10 +22,8 @@ class JanAushadhiApiService {
           return true;
         }
       }
-      print('API returned status code: ${response.statusCode}');
       return false;
     } catch (e) {
-      print('API Status Check Error: $e');
       return false;
     }
   }
@@ -34,23 +31,17 @@ class JanAushadhiApiService {
   // Search for medicines by name
   static Future<JanAushadhiSearchResult> searchMedicines(String query) async {
     try {
-      print('Searching API for: $query');
       final searchUrl = '$baseUrl/search?name=${Uri.encodeComponent(query)}';
-      print('API URL: $searchUrl');
 
       final response = await http.get(
         Uri.parse(searchUrl),
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 15));
 
-      print('API response status: ${response.statusCode}');
-
       // Successfully received a response from the API
       if (response.statusCode >= 200 && response.statusCode < 300) {
         try {
           final data = json.decode(response.body);
-          print(
-              'API data: ${data.toString().substring(0, min(100, data.toString().length))}...');
 
           List<JanAushadhiMedicine> medicines = [];
           if (data['results'] != null) {
@@ -58,8 +49,6 @@ class JanAushadhiApiService {
               medicines.add(JanAushadhiMedicine.fromJson(item));
             }
           }
-
-          print('Found ${medicines.length} medicines');
 
           if (medicines.isEmpty) {
             // API responded correctly but no medicines found
@@ -78,7 +67,6 @@ class JanAushadhiApiService {
             success: true,
           );
         } catch (e) {
-          print('JSON parsing error: $e');
           return JanAushadhiSearchResult(
             medicines: [],
             updatedAt: '',
@@ -103,7 +91,6 @@ class JanAushadhiApiService {
         );
       }
     } catch (e) {
-      print('API Search Error: $e');
       return JanAushadhiSearchResult(
         medicines: [],
         updatedAt: '',

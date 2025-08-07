@@ -35,7 +35,7 @@ class ModernPrescriptionParser {
         prescriptionDate: DateTime.now(),
       );
     } catch (e) {
-      print('Error parsing image: $e');
+      
       return PrescriptionParseResult(
         extractedMedicines: [],
         confidence: 0.0,

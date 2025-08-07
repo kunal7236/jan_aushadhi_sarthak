@@ -37,7 +37,6 @@ class KendraApiService {
         );
       }
     } catch (e) {
-      print('Kendra API Status Check Error: $e');
       return KendraStatusResult(
         isLive: false,
         updatedAt: '',
@@ -50,13 +49,10 @@ class KendraApiService {
   // Get Kendra by code
   static Future<KendraSearchResult> getKendraByCode(String kendraCode) async {
     try {
-      print('Searching Kendra by code: $kendraCode');
       final response = await http.get(
         Uri.parse('$baseUrl/kendra/${Uri.encodeComponent(kendraCode)}'),
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 15));
-
-      print('Kendra API response status: ${response.statusCode}');
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         try {
@@ -91,7 +87,6 @@ class KendraApiService {
         );
       }
     } catch (e) {
-      print('Kendra API Search Error: $e');
       return KendraSearchResult(
         kendras: [],
         updatedAt: '',
@@ -104,13 +99,10 @@ class KendraApiService {
   // Get Kendras by pincode
   static Future<KendraSearchResult> getKendrasByPincode(String pincode) async {
     try {
-      print('Searching Kendras by pincode: $pincode');
       final response = await http.get(
         Uri.parse('$baseUrl/pincode/${Uri.encodeComponent(pincode)}'),
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 15));
-
-      print('Kendra API response status: ${response.statusCode}');
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         try {
@@ -145,7 +137,6 @@ class KendraApiService {
         );
       }
     } catch (e) {
-      print('Kendra API Search Error: $e');
       return KendraSearchResult(
         kendras: [],
         updatedAt: '',
@@ -161,14 +152,11 @@ class KendraApiService {
     required String district,
   }) async {
     try {
-      print('Searching Kendras by location: $state, $district');
       final response = await http.get(
         Uri.parse(
             '$baseUrl/location?state=${Uri.encodeComponent(state)}&district=${Uri.encodeComponent(district)}'),
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 15));
-
-      print('Kendra API response status: ${response.statusCode}');
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         try {
@@ -203,7 +191,6 @@ class KendraApiService {
         );
       }
     } catch (e) {
-      print('Kendra API Search Error: $e');
       return KendraSearchResult(
         kendras: [],
         updatedAt: '',
