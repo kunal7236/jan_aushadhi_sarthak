@@ -26,12 +26,23 @@ class _SplashscreenState extends State<Splashscreen> {
   Widget build(BuildContext context) {
     // Get screen dimensions for responsive design
     final screenSize = MediaQuery.of(context).size;
-    final imageSize = screenSize.width * 0.6; // 60% of screen width
-    final maxImageSize = 300.0; // Maximum size cap
-    final finalImageSize = imageSize > maxImageSize ? maxImageSize : imageSize;
+
+    // More responsive sizing based on screen dimensions
+    final isTablet = screenSize.width > 600;
+    final basePercentage =
+        isTablet ? 0.5 : 0.8; // Smaller on tablets, larger on phones
+    final imageSize = screenSize.width * basePercentage;
+    final maxImageSize = screenSize.height * 0.45; // Use more vertical space
+    final minImageSize = 200.0; // Minimum size for very small screens
+
+    // Calculate final size with bounds
+    double finalImageSize = imageSize;
+    if (finalImageSize > maxImageSize) finalImageSize = maxImageSize;
+    if (finalImageSize < minImageSize) finalImageSize = minImageSize;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor:
+          const Color.fromARGB(255, 90, 127, 93), // Changed from white to green
       body: SizedBox(
         width: double.infinity,
         height: double.infinity, // Force full screen utilization
@@ -43,43 +54,53 @@ class _SplashscreenState extends State<Splashscreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(
+                  Container(
                     height: finalImageSize,
                     width: finalImageSize,
-                    child: Image.asset(
-                      "assets/images/splash.jpg",
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          height: finalImageSize,
-                          width: finalImageSize,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.image_not_supported,
-                                size: finalImageSize *
-                                    0.16, // Responsive icon size
-                                color: Colors.grey,
-                              ),
-                              SizedBox(height: finalImageSize * 0.03),
-                              Text(
-                                "Splash Image\nNot Found",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(
+                          255, 87, 124, 91), // Background color around image
+                      borderRadius:
+                          BorderRadius.circular(20), // Rounded corners
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.asset(
+                        "assets/images/JanAushadhi App Icon.png",
+                        fit: BoxFit
+                            .contain, // Changed to contain to show background color
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            height: finalImageSize,
+                            width: finalImageSize,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.image_not_supported,
+                                  size: finalImageSize *
+                                      0.16, // Responsive icon size
                                   color: Colors.grey,
-                                  fontSize: screenSize.width *
-                                      0.04, // Responsive text
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                                SizedBox(height: finalImageSize * 0.03),
+                                Text(
+                                  "Splash Image\nNot Found",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: screenSize.width *
+                                        0.04, // Responsive text
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                   SizedBox(
