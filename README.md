@@ -52,6 +52,48 @@ A comprehensive Flutter mobile application that helps patients find generic medi
 - ✅ **Responsive Design**: Adapts to different screen sizes and orientations
 - ✅ **Accessibility**: Clear icons, readable fonts, and intuitive navigation
 
+## 📋 Version History
+
+### Version 1.0.0 (Current) - Optimized Release
+
+**Release Date**: December 2024
+
+#### 🚀 **Major Optimizations**
+
+- **APK Size Reduced**: From 122MB to 17.5-19MB per architecture (85% reduction)
+- **Architecture Splitting**: Split APKs for different CPU architectures
+- **Dependency Cleanup**: Removed unused packages for better performance
+- **Build Configuration**: Simplified build process for stability
+- **Proper App Signing**: Production-ready signed APKs for release
+
+#### 🔧 **Technical Improvements**
+
+- Removed `cupertino_icons` dependency (reduced size)
+- Removed `image_picker` dependency (not used in current version)
+- Optimized build.gradle configuration
+- Implemented split-per-ABI APK generation
+- Added proper release signing configuration
+
+#### 📱 **APK Variants Available** (All Properly Signed)
+
+**Naming Convention**: `Jan-Aushadhi-Sarthak-v1.0.0-[architecture]-release.apk`
+
+- `Jan-Aushadhi-Sarthak-v1.0.0-arm64-release.apk` - For modern 64-bit ARM devices (18.8 MB)
+  - **Best for**: Most modern Android phones (2019+), Samsung Galaxy, Google Pixel, OnePlus, etc.
+  - **Architecture**: ARM64-v8a (64-bit ARM)
+  
+- `Jan-Aushadhi-Sarthak-v1.0.0-arm32-release.apk` - For older 32-bit ARM devices (17.5 MB)  
+  - **Best for**: Older Android phones and budget devices
+  - **Architecture**: ARMv7a (32-bit ARM)
+  
+- `Jan-Aushadhi-Sarthak-v1.0.0-x86_64-release.apk` - For x86_64 emulators/devices (19.0 MB)
+  - **Best for**: Android emulators on PC, Intel-based tablets
+  - **Architecture**: x86_64 (64-bit Intel/AMD)
+  
+- `Jan-Aushadhi-Sarthak-v1.0.0-universal-release.apk` - Universal APK (all architectures) (44.3 MB)
+  - **Best for**: When unsure about device architecture, includes all CPU types
+  - **Architecture**: Universal (ARM32, ARM64, x86, x86_64)
+
 ## 🏗️ Technical Architecture
 
 ### **Dependencies & Integrations**
@@ -63,7 +105,7 @@ dependencies:
   google_mlkit_text_recognition: ^0.13.0 # OCR processing
   http: ^1.1.0 # API communication
   url_launcher: ^6.2.0 # Phone calls & navigation
-  cupertino_icons: ^1.0.8 # iOS-style icons
+  # Optimized: Removed unused dependencies (cupertino_icons, image_picker)
 ```
 
 ### **API Integrations**
@@ -137,8 +179,31 @@ lib/
 - Android Studio / VS Code
 - Android SDK (API level 21+)
 - Internet connection for API services
+- **Recommended**: Download the optimized architecture-specific APK for your device
 
 ### Installation
+
+#### Option 1: Install Pre-built APK (Recommended)
+
+**📋 How to Choose the Right APK:**
+
+1. **Check your device architecture** (Settings → About Phone → Processor)
+2. **Download the appropriate APK:**
+
+   - **Most Android devices (2019+)**: `Jan-Aushadhi-Sarthak-v1.0.0-arm64-release.apk` (18.8 MB)
+   - **Older/Budget devices**: `Jan-Aushadhi-Sarthak-v1.0.0-arm32-release.apk` (17.5 MB)
+   - **If unsure**: `Jan-Aushadhi-Sarthak-v1.0.0-universal-release.apk` (44.3 MB - works on all devices)
+
+3. **Enable "Install from Unknown Sources"** in Android Settings
+4. **Install the APK** and enjoy the optimized performance
+
+**📱 Quick Device Guide:**
+- **Samsung Galaxy S9+, Google Pixel 3+, OnePlus 6+**: Use ARM64 version
+- **Older Samsung, Xiaomi, Oppo devices**: Try ARM32 if ARM64 doesn't work
+- **Android Emulator**: Use x86_64 version
+- **Not sure?**: Use Universal version (larger but works everywhere)
+
+#### Option 2: Build from Source
 
 1. **Clone the repository**
 
@@ -181,6 +246,10 @@ The app requires the following permissions:
 - ✅ **Live API Integration**: Connected to actual Jan Aushadhi databases
 - ✅ **Complete User Journey**: From prescription to store navigation
 - ✅ **Cross-Platform**: Works on Android with iOS support ready
+- ✅ **Optimized Performance**: 85% APK size reduction (v1.0.0)
+- ✅ **Architecture Splitting**: Multiple optimized APK variants
+- ✅ **Dependency Management**: Streamlined for better performance
+- ✅ **Production Ready**: Properly signed APKs for release
 
 ## 🤝 Contributing
 
