@@ -387,7 +387,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                           controller: _searchController,
                           decoration: InputDecoration(
                             labelText: "Medicine Name",
-                            hintText: "e.g., Paracetamol, Amoxicillin",
+                            hintText: "Paracetamol",
                             border: const OutlineInputBorder(),
                             suffixIcon: IconButton(
                               icon: const Icon(Icons.search),

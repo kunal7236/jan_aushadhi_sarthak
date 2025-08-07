@@ -254,7 +254,7 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                             controller: _pincodeController,
                             decoration: const InputDecoration(
                               labelText: "Pincode",
-                              hintText: "e.g., 110001",
+                              hintText: "110001",
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.location_pin),
                             ),
@@ -268,7 +268,7 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                             controller: _stateController,
                             decoration: const InputDecoration(
                               labelText: "State",
-                              hintText: "e.g., Andhra Pradesh",
+                              hintText: "Andhra Pradesh",
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.map),
                             ),
@@ -280,7 +280,7 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                             controller: _districtController,
                             decoration: const InputDecoration(
                               labelText: "District",
-                              hintText: "e.g., Anantapur",
+                              hintText: "Anantapur",
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.location_city),
                             ),
@@ -294,7 +294,7 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                             controller: _kendraCodeController,
                             decoration: const InputDecoration(
                               labelText: "Kendra Code",
-                              hintText: "e.g., PMBJK00005",
+                              hintText: "PMBJK00005",
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.qr_code),
                             ),
