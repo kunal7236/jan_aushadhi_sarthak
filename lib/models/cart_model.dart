@@ -3,12 +3,14 @@ class CartMedicineItem {
   final String genericName;
   final String unitSize;
   final String mrp;
+  bool isBought;
 
   CartMedicineItem({
     required this.drugCode,
     required this.genericName,
     required this.unitSize,
     required this.mrp,
+    this.isBought = false,
   });
 
   factory CartMedicineItem.fromJson(Map<String, dynamic> json) {
@@ -17,6 +19,7 @@ class CartMedicineItem {
       genericName: json['genericName']?.toString() ?? '',
       unitSize: json['unitSize']?.toString() ?? '',
       mrp: json['mrp']?.toString() ?? '',
+      isBought: json['isBought'] == true,
     );
   }
 
@@ -26,6 +29,7 @@ class CartMedicineItem {
       'genericName': genericName,
       'unitSize': unitSize,
       'mrp': mrp,
+      'isBought': isBought,
     };
   }
 }

@@ -62,7 +62,7 @@ class _CartPageState extends State<CartPage> {
                 title: titleController.text.trim(),
                 createdAt: createdAtController.text.trim(),
               );
-              if (mounted) {
+              if (context.mounted) {
                 Navigator.pop(context);
               }
             },
@@ -70,6 +70,28 @@ class _CartPageState extends State<CartPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _deleteMedicine({
+    required String draftId,
+    required int medicineIndex,
+  }) async {
+    await CartStorageService.removeMedicine(
+      draftId: draftId,
+      medicineIndex: medicineIndex,
+    );
+  }
+
+  Future<void> _setBoughtStatus({
+    required String draftId,
+    required int medicineIndex,
+    required bool isBought,
+  }) async {
+    await CartStorageService.setMedicineBoughtStatus(
+      draftId: draftId,
+      medicineIndex: medicineIndex,
+      isBought: isBought,
     );
   }
 
@@ -155,10 +177,69 @@ class _CartPageState extends State<CartPage> {
                           itemBuilder: (context, medicineIndex) {
                             final medicine = draft.medicines[medicineIndex];
                             return ListTile(
-                              leading: const Icon(Icons.medication_outlined),
-                              title: Text(medicine.genericName),
+                              leading: Icon(
+                                medicine.isBought
+                                    ? Icons.check_circle
+                                    : Icons.radio_button_unchecked,
+                                color: medicine.isBought
+                                    ? Colors.green
+                                    : Colors.grey,
+                              ),
+                              title: Text(
+                                medicine.genericName,
+                                style: TextStyle(
+                                  decoration: medicine.isBought
+                                      ? TextDecoration.lineThrough
+                                      : TextDecoration.none,
+                                  color: medicine.isBought
+                                      ? Colors.grey[600]
+                                      : Colors.black,
+                                ),
+                              ),
                               subtitle: Text(
                                 'Drug Code: ${medicine.drugCode} • ${medicine.unitSize} • ₹${medicine.mrp}',
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    tooltip: 'Mark Bought',
+                                    icon: Icon(
+                                      Icons.check,
+                                      color: medicine.isBought
+                                          ? Colors.green
+                                          : Colors.grey,
+                                    ),
+                                    onPressed: () => _setBoughtStatus(
+                                      draftId: draft.id,
+                                      medicineIndex: medicineIndex,
+                                      isBought: true,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    tooltip: 'Mark Left',
+                                    icon: Icon(
+                                      Icons.close,
+                                      color: !medicine.isBought
+                                          ? Colors.red
+                                          : Colors.grey,
+                                    ),
+                                    onPressed: () => _setBoughtStatus(
+                                      draftId: draft.id,
+                                      medicineIndex: medicineIndex,
+                                      isBought: false,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    tooltip: 'Delete',
+                                    icon: const Icon(Icons.delete_outline),
+                                    color: Colors.red[700],
+                                    onPressed: () => _deleteMedicine(
+                                      draftId: draft.id,
+                                      medicineIndex: medicineIndex,
+                                    ),
+                                  ),
+                                ],
                               ),
                             );
                           },

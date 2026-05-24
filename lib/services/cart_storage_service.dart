@@ -132,4 +132,45 @@ class CartStorageService {
     drafts[draftIndex].createdAt = createdAt;
     await _saveDrafts(drafts);
   }
+
+  static Future<void> removeMedicine({
+    required String draftId,
+    required int medicineIndex,
+  }) async {
+    await initialize();
+
+    final drafts = List<MedicineDraft>.from(draftsNotifier.value);
+    final draftIndex = drafts.indexWhere((draft) => draft.id == draftId);
+    if (draftIndex == -1) {
+      return;
+    }
+
+    if (medicineIndex < 0 || medicineIndex >= drafts[draftIndex].medicines.length) {
+      return;
+    }
+
+    drafts[draftIndex].medicines.removeAt(medicineIndex);
+    await _saveDrafts(drafts);
+  }
+
+  static Future<void> setMedicineBoughtStatus({
+    required String draftId,
+    required int medicineIndex,
+    required bool isBought,
+  }) async {
+    await initialize();
+
+    final drafts = List<MedicineDraft>.from(draftsNotifier.value);
+    final draftIndex = drafts.indexWhere((draft) => draft.id == draftId);
+    if (draftIndex == -1) {
+      return;
+    }
+
+    if (medicineIndex < 0 || medicineIndex >= drafts[draftIndex].medicines.length) {
+      return;
+    }
+
+    drafts[draftIndex].medicines[medicineIndex].isBought = isBought;
+    await _saveDrafts(drafts);
+  }
 }

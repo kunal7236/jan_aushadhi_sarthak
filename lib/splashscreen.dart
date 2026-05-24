@@ -1,6 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+
+import 'services/kendra_api_service.dart';
 import 'home_shell.dart';
 
 class Splashscreen extends StatefulWidget {
@@ -11,16 +11,32 @@ class Splashscreen extends StatefulWidget {
 }
 
 class _SplashscreenState extends State<Splashscreen> {
+  bool _checkedStatus = false;
+
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), () {
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeShellPage()),
-      );
-    });
+    _checkStartupStatus();
+  }
+
+  Future<void> _checkStartupStatus() async {
+    final status = await KendraApiService.checkStatus();
+
+    if (!mounted || _checkedStatus) {
+      return;
+    }
+
+    _checkedStatus = true;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomeShellPage(
+          initialIndex: status.isLive ? 0 : 4,
+          contactOpenedDueToApiIssue: !status.isLive,
+        ),
+      ),
+    );
   }
 
   @override
@@ -102,18 +118,6 @@ class _SplashscreenState extends State<Splashscreen> {
                           );
                         },
                       ),
-                    ),
-                  ),
-                  SizedBox(
-                      height: screenSize.height * 0.03), // Responsive spacing
-                  const CircularProgressIndicator(),
-                  SizedBox(height: screenSize.height * 0.02),
-                  Text(
-                    "Loading...",
-                    style: TextStyle(
-                      fontSize:
-                          screenSize.width * 0.045, // Responsive text size
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],

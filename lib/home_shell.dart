@@ -1,26 +1,43 @@
 import 'package:flutter/material.dart';
 
 import 'cart_page.dart';
+import 'contact_developer_page.dart';
 import 'filepicker_page.dart';
 import 'medicine_search_page.dart';
 import 'store_locator_page.dart';
 
 class HomeShellPage extends StatefulWidget {
-  const HomeShellPage({super.key});
+  final int initialIndex;
+  final bool contactOpenedDueToApiIssue;
+
+  const HomeShellPage({
+    super.key,
+    this.initialIndex = 0,
+    this.contactOpenedDueToApiIssue = false,
+  });
 
   @override
   State<HomeShellPage> createState() => _HomeShellPageState();
 }
 
 class _HomeShellPageState extends State<HomeShellPage> {
-  int selectedIndex = 0;
+  late int selectedIndex;
 
-  final List<Widget> pages = const [
+  late final List<Widget> pages = [
     FilepickerPage(),
     MedicineSearchPage(),
     StoreLocatorPage(),
     CartPage(),
+    ContactDeveloperPage(
+      showIssueBanner: widget.contactOpenedDueToApiIssue,
+    ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    selectedIndex = widget.initialIndex;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +73,11 @@ class _HomeShellPageState extends State<HomeShellPage> {
             icon: Icon(Icons.list_alt_outlined),
             selectedIcon: Icon(Icons.list_alt),
             label: 'List',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.contact_support_outlined),
+            selectedIcon: Icon(Icons.contact_support),
+            label: 'Contact',
           ),
         ],
       ),

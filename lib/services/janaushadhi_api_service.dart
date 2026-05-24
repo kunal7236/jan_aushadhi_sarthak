@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 
 class JanAushadhiApiService {
   static const String baseUrl = 'https://jan-api.kunalka.me';
+  static const String _genericError =
+      'Something went wrong. Please try again.';
 
   // Check if the API service is live
   static Future<bool> checkStatus() async {
@@ -12,19 +14,15 @@ class JanAushadhiApiService {
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 10));
 
-      // Consider any successful response as API being live
       if (response.statusCode >= 200 && response.statusCode < 300) {
         try {
           final data = json.decode(response.body);
           if (data is Map<String, dynamic>) {
-            return data['message']?.toString().isNotEmpty == true ||
-                data['status']?.toString().isNotEmpty == true ||
-                data['live'] == true;
+            return data['status']?.toString().toLowerCase() == 'online';
           }
-          return true;
+          return false;
         } catch (e) {
-          // Even if JSON parsing fails, if we got a 200 response, API is likely up
-          return true;
+          return false;
         }
       }
       return false;
@@ -50,17 +48,6 @@ class JanAushadhiApiService {
 
           final medicines = _parseMedicineResults(data);
 
-          if (medicines.isEmpty) {
-            // API responded correctly but no medicines found
-            return JanAushadhiSearchResult(
-              medicines: [],
-              updatedAt: '',
-              success: true,
-              error:
-                  'Medicine "$query" is not available in Jan Aushadhi stores',
-            );
-          }
-
           return JanAushadhiSearchResult(
             medicines: medicines,
             updatedAt: '',
@@ -71,23 +58,24 @@ class JanAushadhiApiService {
             medicines: [],
             updatedAt: '',
             success: false,
-            error: 'Error processing API response: $e',
+            error: _genericError,
+            isServerError: false,
           );
         }
       } else if (response.statusCode == 404) {
-        // Handle 404 specifically - medicine not found in database
         return JanAushadhiSearchResult(
           medicines: [],
           updatedAt: '',
           success: true,
-          error: 'Medicine "$query" is not available in Jan Aushadhi stores',
         );
       } else {
+        final isServerError = response.statusCode >= 500;
         return JanAushadhiSearchResult(
           medicines: [],
           updatedAt: '',
           success: false,
-          error: 'API returned status code: ${response.statusCode}',
+          error: _genericError,
+          isServerError: isServerError,
         );
       }
     } catch (e) {
@@ -95,7 +83,8 @@ class JanAushadhiApiService {
         medicines: [],
         updatedAt: '',
         success: false,
-        error: 'Failed to connect to medicine database: $e',
+        error: _genericError,
+        isServerError: false,
       );
     }
   }
@@ -187,11 +176,13 @@ class JanAushadhiSearchResult {
   final String updatedAt;
   final bool success;
   final String? error;
+  final bool isServerError;
 
   JanAushadhiSearchResult({
     required this.medicines,
     required this.updatedAt,
     required this.success,
     this.error,
+    this.isServerError = false,
   });
 }

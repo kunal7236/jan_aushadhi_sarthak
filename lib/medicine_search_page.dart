@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'home_shell.dart';
 import 'services/cart_storage_service.dart';
 import 'services/janaushadhi_api_service.dart';
 import 'store_locator_page.dart';
@@ -67,12 +68,22 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
       return;
     }
 
+    if (!isLive) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomeShellPage(
+            initialIndex: 4,
+            contactOpenedDueToApiIssue: true,
+          ),
+        ),
+      );
+      return;
+    }
+
     setState(() {
-      isApiDown = !isLive;
-      if (isApiDown) {
-        errorMessage =
-            'Jan Aushadhi medicine database is currently unavailable. Please try again later.';
-      } else if (errorMessage?.contains('unavailable') == true) {
+      isApiDown = false;
+      if (errorMessage?.contains('unavailable') == true) {
         errorMessage = null;
       }
     });
@@ -101,6 +112,19 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
       return;
     }
 
+    if (result.isServerError) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomeShellPage(
+            initialIndex: 4,
+            contactOpenedDueToApiIssue: true,
+          ),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       isLoading = false;
       searchResults = List<JanAushadhiMedicine>.from(result.medicines);
@@ -113,18 +137,10 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
 
       if (result.success) {
         if (!_hasPrescriptionMedicines && result.medicines.isEmpty) {
-          errorMessage =
-              'No medicines found for "$query". Try another medicine or check the spelling.';
+          errorMessage = 'No medicines found. Please try a different name.';
         }
       } else {
-        if (result.error != null &&
-            (result.error!.contains('Failed to connect') ||
-                result.error!.contains('timeout') ||
-                result.error!.contains('status code'))) {
-          isApiDown = true;
-          _checkApiStatus();
-        }
-        errorMessage = result.error;
+        errorMessage = result.error ?? 'Something went wrong. Please try again.';
         searchResults = [];
       }
     });
@@ -210,6 +226,19 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                 prescriptionMedicineResults[medicine]!.isEmpty)
             .length ??
         0;
+  }
+
+  bool _isPrescriptionSearchComplete() {
+    if (!_hasPrescriptionMedicines || !prescriptionSearchStarted) {
+      return false;
+    }
+
+    return prescriptionMedicines!
+        .every((medicine) => prescriptionMedicineResults.containsKey(medicine));
+  }
+
+  bool _isMedicineFound(String medicine) {
+    return (prescriptionMedicineResults[medicine]?.isNotEmpty ?? false);
   }
 
   List<JanAushadhiMedicine> _resultsForCurrentMedicine() {
@@ -392,8 +421,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                               ],
                             ),
                           const SizedBox(height: 12),
-                          if (currentMedicineIndex >=
-                              prescriptionMedicines!.length - 1)
+                          if (_isPrescriptionSearchComplete())
                             Container(
                               width: double.infinity,
                               padding: const EdgeInsets.all(12),
@@ -425,6 +453,75 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Theme(
+                                    data: Theme.of(context).copyWith(
+                                      dividerColor: Colors.transparent,
+                                    ),
+                                    child: ExpansionTile(
+                                      tilePadding: EdgeInsets.zero,
+                                      childrenPadding: EdgeInsets.zero,
+                                      title: Text(
+                                        'View searched medicines',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.green[800],
+                                        ),
+                                      ),
+                                      trailing: Icon(
+                                        Icons.keyboard_arrow_down,
+                                        color: Colors.green[700],
+                                      ),
+                                      children: [
+                                        ...prescriptionMedicines!.map((medicine) {
+                                          final found = _isMedicineFound(medicine);
+                                          return Container(
+                                            margin: const EdgeInsets.only(bottom: 6),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 8,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: found ? Colors.green[100] : Colors.red[100],
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: found ? Colors.green[300]! : Colors.red[300]!,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  found ? Icons.check_circle : Icons.cancel,
+                                                  size: 16,
+                                                  color: found ? Colors.green[700] : Colors.red[700],
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Expanded(
+                                                  child: Text(
+                                                    medicine,
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: found ? Colors.green[800] : Colors.red[800],
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  found ? 'Found' : 'Missing',
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    color: found ? Colors.green[700] : Colors.red[700],
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }),
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -503,9 +600,8 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                   Card(
                     color: isApiDown
                         ? Colors.red[50]
-                        : errorMessage!.contains(
-                                'not available in Jan Aushadhi stores')
-                            ? Colors.blue[50]
+                      : errorMessage!.contains('No medicines found')
+                        ? Colors.blue[50]
                             : Colors.orange[50],
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -514,14 +610,12 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                           Icon(
                             isApiDown
                                 ? Icons.error
-                                : errorMessage!.contains(
-                                        'not available in Jan Aushadhi stores')
+                              : errorMessage!.contains('No medicines found')
                                     ? Icons.info
                                     : Icons.info_outline,
                             color: isApiDown
                                 ? Colors.red
-                                : errorMessage!.contains(
-                                        'not available in Jan Aushadhi stores')
+                              : errorMessage!.contains('No medicines found')
                                     ? Colors.blue[700]
                                     : Colors.orange,
                           ),
@@ -533,16 +627,14 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                                 Text(
                                   isApiDown
                                       ? 'Service Unavailable'
-                                      : errorMessage!.contains(
-                                              'not available in Jan Aushadhi stores')
+                                      : errorMessage!.contains('No medicines found')
                                           ? 'Medicine Not Available'
                                           : 'Search Results',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     color: isApiDown
                                         ? Colors.red
-                                        : errorMessage!.contains(
-                                                'not available in Jan Aushadhi stores')
+                                        : errorMessage!.contains('No medicines found')
                                             ? Colors.blue[700]
                                             : Colors.orange[800],
                                   ),
@@ -748,31 +840,4 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 80,
-            child: Text(
-              '$label:',
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[700],
-                fontSize: 12,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 12),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

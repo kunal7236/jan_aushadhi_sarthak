@@ -106,32 +106,12 @@ class EnhancedPrescriptionService {
   static Future<PrescriptionParseResult> parseFile(File file) async {
     String extension = file.path.toLowerCase();
 
-    if (extension.endsWith('.pdf')) {
-      return await _parsePDF(file);
-    } else if (extension.endsWith('.jpg') ||
+    if (extension.endsWith('.jpg') ||
         extension.endsWith('.jpeg') ||
         extension.endsWith('.png')) {
       return await ModernPrescriptionParser.parseImage(file);
     } else {
       throw Exception('Unsupported file format');
     }
-  }
-
-  static Future<PrescriptionParseResult> _parsePDF(File pdfFile) async {
-    // TODO: Implement PDF text extraction
-    // You can use packages like:
-    // - syncfusion_flutter_pdf
-    // - pdf_text
-
-    await Future.delayed(const Duration(seconds: 2));
-
-    return PrescriptionParseResult(
-      extractedMedicines: [
-        Medicine(commercialName: "Paracetamol 500mg"),
-        Medicine(commercialName: "Amoxicillin 250mg"),
-      ],
-      confidence: 0.75,
-      prescriptionDate: DateTime.now(),
-    );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'home_shell.dart';
 import 'services/kendra_api_service.dart';
 import 'utils/action_utils.dart';
 
@@ -34,15 +35,23 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
     final status = await KendraApiService.checkStatus();
 
     if (mounted) {
+      if (!status.isLive) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomeShellPage(
+              initialIndex: 4,
+              contactOpenedDueToApiIssue: true,
+            ),
+          ),
+        );
+        return;
+      }
+
       setState(() {
-        isApiDown = !status.isLive;
-        if (status.success && status.isLive) {
-          lastUpdated = status.updatedAt;
-          errorMessage = null;
-        } else {
-          errorMessage =
-              status.error ?? "Store locator service is currently unavailable.";
-        }
+        isApiDown = false;
+        lastUpdated = status.updatedAt;
+        errorMessage = null;
       });
     }
   }

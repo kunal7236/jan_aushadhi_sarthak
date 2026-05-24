@@ -30,14 +30,8 @@ class _MedicineExtractionPageState extends State<MedicineExtractionPage> {
   Future<void> _extractMedicines() async {
     try {
       // Use actual OCR service to parse the prescription
-      PrescriptionParseResult result;
-
-      String fileName = widget.prescriptionFile.path.toLowerCase();
-      if (fileName.endsWith('.pdf')) {
-        result = await PrescriptionParser.parsePDF(widget.prescriptionFile);
-      } else {
-        result = await PrescriptionParser.parseImage(widget.prescriptionFile);
-      }
+      final PrescriptionParseResult result =
+          await PrescriptionParser.parseImage(widget.prescriptionFile);
 
       if (mounted) {
         setState(() {
@@ -45,11 +39,6 @@ class _MedicineExtractionPageState extends State<MedicineExtractionPage> {
           confidence = result.confidence;
           isLoading = false;
         });
-
-        // Show confidence score to user
-        if (confidence < 0.5) {
-          _showLowConfidenceWarning();
-        }
       }
     } catch (e) {
       if (mounted) {
@@ -65,25 +54,6 @@ class _MedicineExtractionPageState extends State<MedicineExtractionPage> {
         );
       }
     }
-  }
-
-  void _showLowConfidenceWarning() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Low Confidence"),
-        content: Text(
-          "Text recognition confidence is ${(confidence * 100).toInt()}%. "
-          "Please carefully verify the extracted medicine names.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
-          ),
-        ],
-      ),
-    );
   }
 
   void _editMedicine(int index, String newName) {
@@ -125,53 +95,18 @@ class _MedicineExtractionPageState extends State<MedicineExtractionPage> {
         height: screenSize.height, // Force full height utilization
         child: Column(
           children: [
-            // Header info
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.info, color: Colors.blue),
-                        const SizedBox(width: 10),
-                        const Expanded(
-                          child: Text(
-                            "Please verify the extracted medicine names. You can edit them if needed.",
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (!isLoading) ...[
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Confidence: ${(confidence * 100).toInt()}%",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: confidence > 0.7
-                                  ? Colors.green
-                                  : Colors.orange,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Text(
-                            "Extracted: ${extractedMedicines.length} medicines",
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
+            if (!isLoading)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Confidence: ${(confidence * 100).toInt()}% • Extracted: ${extractedMedicines.length} medicines",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: confidence > 0.7 ? Colors.green : Colors.orange,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-            ),
             if (!isLoading && extractedMedicines.isNotEmpty) ...[
               const SizedBox(height: 12),
               SizedBox(
@@ -641,7 +576,6 @@ class _GenericAlternativesPageState extends State<GenericAlternativesPage> {
   }
 
   void _checkJanAushadhiAvailability() {
-    // TODO: Navigate to Jan Aushadhi availability page
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text("Jan Aushadhi availability check coming soon!"),

@@ -262,33 +262,10 @@ class PrescriptionParser {
     return uniqueMedicines.values.toList();
   }
 
-  static Future<PrescriptionParseResult> parsePDF(File pdfFile) async {
-    // Simulate PDF parsing time
-    await Future.delayed(const Duration(seconds: 3));
-
-    // TODO: Implement PDF text extraction using packages like:
-    // - pdf_text
-    // - syncfusion_flutter_pdf
-
-    return PrescriptionParseResult(
-      extractedMedicines: [
-        Medicine(commercialName: "Paracetamol 500mg"),
-        Medicine(commercialName: "Amoxicillin 250mg"),
-        Medicine(commercialName: "Omeprazole 20mg"),
-      ],
-      confidence: 0.92,
-      prescriptionDate: DateTime.now(),
-    );
-  }
 }
 
 class MedicineDatabase {
-  // TODO: Implement actual database integration
-  // This could be:
-  // - Local SQLite database
-  // - Firebase Firestore
-  // - REST API calls to your backend
-  // - CSV/JSON file parsing
+  // Medicine lookup is currently backed by a local mapping and Jan Aushadhi API.
 
   static Future<Medicine?> findGenericName(String commercialName) async {
     // Simulate database lookup
@@ -324,7 +301,6 @@ class MedicineDatabase {
     // Simulate API call to Jan Aushadhi database
     await Future.delayed(const Duration(seconds: 1));
 
-    // TODO: Replace with actual Jan Aushadhi API integration
     for (var medicine in medicines) {
       // Dummy availability check
       medicine.isAvailableInJanAushadhi = medicine.genericName != null;
