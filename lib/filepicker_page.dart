@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'medicine_extraction_page.dart';
-import 'medicine_search_page.dart';
 
 class FilepickerPage extends StatefulWidget {
   const FilepickerPage({super.key});
@@ -247,66 +246,6 @@ class _FilepickerPageState extends State<FilepickerPage> {
                 ),
 
                 const SizedBox(height: 30),
-
-                // Alternative option - direct search
-                const Divider(),
-                const SizedBox(height: 20),
-
-                Card(
-                  color: Colors.blue[50],
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        const Icon(
-                          Icons.search,
-                          color: Colors.blue,
-                          size: 40,
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          "Search directly without prescription",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          "Find Jan Aushadhi alternatives by typing medicine names",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const MedicineSearchPage(),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.search),
-                            label: const Text("Search Medicines"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue[600],
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               ],
             ),
           ),

@@ -360,7 +360,6 @@ class MedicineDatabase {
             .map((kendra) => JanAushadhiStore(
                   name: kendra.cleanName,
                   address: kendra.address,
-                  phone: kendra.formattedContact,
                   // Distance not available from API, setting to null
                   distance: null,
                   availableMedicines: [], // Not available from this API
@@ -390,7 +389,6 @@ class MedicineDatabase {
             .map((kendra) => JanAushadhiStore(
                   name: kendra.cleanName,
                   address: kendra.address,
-                  phone: kendra.formattedContact,
                   // Distance not available from API, setting to null
                   distance: null,
                   availableMedicines: [], // Not available from this API
@@ -415,7 +413,6 @@ class MedicineDatabase {
         return JanAushadhiStore(
           name: kendra.cleanName,
           address: kendra.address,
-          phone: kendra.formattedContact,
           distance: null, // Not available from API
           availableMedicines: [], // Not available from this API
         );

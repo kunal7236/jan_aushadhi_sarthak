@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+
+import 'services/cart_storage_service.dart';
 import 'services/janaushadhi_api_service.dart';
 import 'store_locator_page.dart';
 
 class MedicineSearchPage extends StatefulWidget {
   final List<String>? initialMedicines;
+  final String? initialDraftTitle;
 
-  const MedicineSearchPage({super.key, this.initialMedicines});
+  const MedicineSearchPage({
+    super.key,
+    this.initialMedicines,
+    this.initialDraftTitle,
+  });
 
   @override
   State<MedicineSearchPage> createState() => _MedicineSearchPageState();
@@ -17,79 +24,66 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
   bool isLoading = false;
   bool isApiDown = false;
   String? errorMessage;
-  String? lastUpdated;
 
-  // New variables for prescription medicine control
   List<String>? prescriptionMedicines;
   int currentMedicineIndex = 0;
-  bool isSearchingPrescription = false;
-  Map<String, bool> medicineSearchResults =
-      {}; // Track search results for each medicine
+  bool prescriptionSearchStarted = false;
+  final Map<String, List<JanAushadhiMedicine>> prescriptionMedicineResults = {};
+  String cartDraftTitle = 'List';
+
+  bool get _hasPrescriptionMedicines =>
+      prescriptionMedicines != null && prescriptionMedicines!.isNotEmpty;
+
+  String get _currentPrescriptionMedicine =>
+      prescriptionMedicines![currentMedicineIndex];
 
   @override
   void initState() {
     super.initState();
     _checkApiStatus();
 
-    // Store prescription medicines but don't search automatically
     if (widget.initialMedicines != null &&
         widget.initialMedicines!.isNotEmpty) {
-      prescriptionMedicines = List.from(widget.initialMedicines!);
-      // Set the first medicine in the search field
-      _searchController.text = prescriptionMedicines![0];
+      prescriptionMedicines = List<String>.from(widget.initialMedicines!);
+      _searchController.text = prescriptionMedicines!.first;
+    }
+
+    final incomingTitle = widget.initialDraftTitle?.trim();
+    if (incomingTitle != null && incomingTitle.isNotEmpty) {
+      cartDraftTitle = incomingTitle;
     }
   }
 
-  // Method to search the next medicine from prescription
-  void _searchNextPrescriptionMedicine() async {
-    if (prescriptionMedicines == null ||
-        currentMedicineIndex >= prescriptionMedicines!.length) {
-      return;
-    }
-
-    setState(() {
-      isSearchingPrescription = true;
-    });
-
-    String currentMedicine = prescriptionMedicines![currentMedicineIndex];
-    _searchController.text = currentMedicine;
-    await _searchMedicines();
-
-    // Store the search result for this medicine
-    bool medicineFound = searchResults.isNotEmpty;
-    medicineSearchResults[currentMedicine] = medicineFound;
-
-    setState(() {
-      currentMedicineIndex++;
-      isSearchingPrescription = false;
-    });
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _checkApiStatus() async {
     final isLive = await JanAushadhiApiService.checkStatus();
 
-    if (mounted) {
-      setState(() {
-        isApiDown = !isLive;
-        if (isApiDown) {
-          errorMessage =
-              "Jan Aushadhi medicine database is currently unavailable. Please try again later.";
-        } else {
-          // Clear error message if API is up and it was previously showing as down
-          if (errorMessage?.contains("unavailable") == true) {
-            errorMessage = null;
-          }
-        }
-      });
+    if (!mounted) {
+      return;
     }
+
+    setState(() {
+      isApiDown = !isLive;
+      if (isApiDown) {
+        errorMessage =
+            'Jan Aushadhi medicine database is currently unavailable. Please try again later.';
+      } else if (errorMessage?.contains('unavailable') == true) {
+        errorMessage = null;
+      }
+    });
   }
 
-  Future<void> _searchMedicines() async {
-    final query = _searchController.text.trim();
+  Future<void> _searchMedicines({String? forcedQuery}) async {
+    final query = (forcedQuery ?? _searchController.text).trim();
     if (query.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Please enter a medicine name to search"),
+          content: Text('Please enter a medicine name to search'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -103,71 +97,172 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
 
     final result = await JanAushadhiApiService.searchMedicines(query);
 
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-        if (result.success) {
-          searchResults = result.medicines;
-          lastUpdated = result.updatedAt;
-          isApiDown = false;
-
-          // Show message if no results found but API is working
-          if (result.medicines.isEmpty) {
-            errorMessage =
-                "No medicines found for '$query'. Try another Medicine/Check the Spelling!";
-          }
-        } else {
-          // Only set API down if it's a connection issue, not just empty results
-          if (result.error != null &&
-              (result.error!.contains("Failed to connect") ||
-                  result.error!.contains("timeout") ||
-                  result.error!.contains("status code"))) {
-            isApiDown = true;
-            errorMessage = result.error;
-
-            // Recheck API status automatically when a search fails with connection issues
-            _checkApiStatus();
-          } else {
-            isApiDown = false;
-            errorMessage = result.error;
-          }
-          searchResults = [];
-        }
-      });
+    if (!mounted) {
+      return;
     }
+
+    setState(() {
+      isLoading = false;
+      searchResults = List<JanAushadhiMedicine>.from(result.medicines);
+      isApiDown = false;
+
+      if (_hasPrescriptionMedicines && prescriptionMedicines!.contains(query)) {
+        prescriptionMedicineResults[query] =
+            List<JanAushadhiMedicine>.from(result.medicines);
+      }
+
+      if (result.success) {
+        if (!_hasPrescriptionMedicines && result.medicines.isEmpty) {
+          errorMessage =
+              'No medicines found for "$query". Try another medicine or check the spelling.';
+        }
+      } else {
+        if (result.error != null &&
+            (result.error!.contains('Failed to connect') ||
+                result.error!.contains('timeout') ||
+                result.error!.contains('status code'))) {
+          isApiDown = true;
+          _checkApiStatus();
+        }
+        errorMessage = result.error;
+        searchResults = [];
+      }
+    });
+  }
+
+  Future<void> _startPrescriptionSearch() async {
+    if (!_hasPrescriptionMedicines) {
+      return;
+    }
+
+    setState(() {
+      prescriptionSearchStarted = true;
+    });
+
+    await _searchCurrentPrescriptionMedicine();
+  }
+
+  Future<void> _searchCurrentPrescriptionMedicine() async {
+    if (!_hasPrescriptionMedicines) {
+      return;
+    }
+
+    final medicine = _currentPrescriptionMedicine;
+    _searchController.text = medicine;
+    await _searchMedicines(forcedQuery: medicine);
+  }
+
+  Future<void> _showPrescriptionMedicine(int index) async {
+    if (!_hasPrescriptionMedicines) {
+      return;
+    }
+
+    if (index < 0 || index >= prescriptionMedicines!.length) {
+      return;
+    }
+
+    final medicine = prescriptionMedicines![index];
+
+    setState(() {
+      currentMedicineIndex = index;
+      prescriptionSearchStarted = true;
+      _searchController.text = medicine;
+      errorMessage = null;
+      searchResults = List<JanAushadhiMedicine>.from(
+        prescriptionMedicineResults[medicine] ?? const <JanAushadhiMedicine>[],
+      );
+    });
+
+    if (!prescriptionMedicineResults.containsKey(medicine)) {
+      await _searchMedicines(forcedQuery: medicine);
+    }
+  }
+
+  Future<void> _goToPreviousPrescriptionMedicine() async {
+    if (!_hasPrescriptionMedicines || currentMedicineIndex <= 0) {
+      return;
+    }
+
+    await _showPrescriptionMedicine(currentMedicineIndex - 1);
+  }
+
+  Future<void> _goToNextPrescriptionMedicine() async {
+    if (!_hasPrescriptionMedicines ||
+        currentMedicineIndex >= prescriptionMedicines!.length - 1) {
+      return;
+    }
+
+    await _showPrescriptionMedicine(currentMedicineIndex + 1);
+  }
+
+  int _foundPrescriptionCount() {
+    return prescriptionMedicines
+            ?.where((medicine) =>
+                (prescriptionMedicineResults[medicine]?.isNotEmpty ?? false))
+            .length ??
+        0;
+  }
+
+  int _notFoundPrescriptionCount() {
+    return prescriptionMedicines
+            ?.where((medicine) =>
+                prescriptionMedicineResults.containsKey(medicine) &&
+                prescriptionMedicineResults[medicine]!.isEmpty)
+            .length ??
+        0;
+  }
+
+  List<JanAushadhiMedicine> _resultsForCurrentMedicine() {
+    if (!_hasPrescriptionMedicines) {
+      return searchResults;
+    }
+
+    final medicine = _currentPrescriptionMedicine;
+    return prescriptionMedicineResults[medicine] ?? searchResults;
+  }
+
+  Future<void> _addToCart(JanAushadhiMedicine medicine) async {
+    final added = await CartStorageService.addMedicine(
+      medicine,
+      draftTitle: cartDraftTitle,
+    );
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          added
+              ? 'Added ${medicine.cleanGenericName} to your list'
+              : '${medicine.cleanGenericName} is already in your list',
+        ),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get screen dimensions for responsive design
-    final screenSize = MediaQuery.of(context).size;
+    final visibleResults = _resultsForCurrentMedicine();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Search Jan Aushadhi Medicines"),
+        title: const Text('Search Jan Aushadhi Medicines'),
         backgroundColor: Colors.green[700],
         foregroundColor: Colors.white,
       ),
       body: Container(
         color: Colors.green[50],
         width: double.infinity,
-        height: screenSize.height, // Force full height utilization
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: screenSize.height -
-                  (AppBar().preferredSize.height +
-                      MediaQuery.of(context).padding.top +
-                      32), // Account for AppBar and padding
-            ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // Initial medicines from prescription (if any)
-                if (prescriptionMedicines != null &&
-                    prescriptionMedicines!.isNotEmpty) ...[
+                if (_hasPrescriptionMedicines) ...[
                   Card(
-                    color: Colors.blue[50],
+                    color: Colors.teal[50],
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -176,123 +271,70 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                           Row(
                             children: [
                               Icon(Icons.medical_services,
-                                  color: Colors.blue[700]),
+                                  color: Colors.teal[700]),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  "Medicines from your prescription:",
+                                  'Medicines from your prescription:',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.blue[700],
+                                    color: Colors.teal[700],
                                   ),
                                 ),
                               ),
-                              // Progress indicator
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue[200],
+                                  color: Colors.teal[100],
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
-                                  "$currentMedicineIndex/${prescriptionMedicines!.length}",
+                                  '${currentMedicineIndex + 1}/${prescriptionMedicines!.length}',
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.blue[800],
+                                    color: Colors.teal[800],
                                   ),
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 12),
-                          // Currently searching medicine highlight
-                          if (currentMedicineIndex <
-                              prescriptionMedicines!.length)
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.green[100],
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.green[300]!),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.search,
-                                      color: Colors.green[700], size: 20),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    "Current: ${prescriptionMedicines![currentMedicineIndex]}",
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.teal[50],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.teal[200]!),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.radio_button_checked,
+                                    color: Colors.teal[700], size: 20),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Current: $_currentPrescriptionMedicine',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.green[800],
+                                      color: Colors.teal[800],
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 4,
-                            children: prescriptionMedicines!
-                                .asMap()
-                                .entries
-                                .map((entry) {
-                              int index = entry.key;
-                              String medicine = entry.value;
-                              bool isSearched = index < currentMedicineIndex;
-                              bool isCurrent = index == currentMedicineIndex;
-                              bool? wasFound = medicineSearchResults[medicine];
-
-                              Color chipColor;
-                              Widget? avatar;
-
-                              if (isSearched && wasFound != null) {
-                                // Medicine has been searched
-                                if (wasFound) {
-                                  // Found - green
-                                  chipColor = Colors.green[100]!;
-                                  avatar = Icon(Icons.check,
-                                      size: 16, color: Colors.green[700]);
-                                } else {
-                                  // Not found - red
-                                  chipColor = Colors.red[100]!;
-                                  avatar = Icon(Icons.close,
-                                      size: 16, color: Colors.red[700]);
-                                }
-                              } else if (isCurrent) {
-                                // Currently being searched - orange
-                                chipColor = Colors.orange[100]!;
-                                avatar = Icon(Icons.search,
-                                    size: 16, color: Colors.orange[700]);
-                              } else {
-                                // Not searched yet - blue
-                                chipColor = Colors.blue[100]!;
-                                avatar = null;
-                              }
-
-                              return Chip(
-                                label: Text(medicine),
-                                backgroundColor: chipColor,
-                                avatar: avatar,
-                              );
-                            }).toList(),
                           ),
                           const SizedBox(height: 12),
-                          // Search next medicine button
-                          if (currentMedicineIndex <
-                              prescriptionMedicines!.length)
+                          if (!prescriptionSearchStarted)
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton.icon(
-                                onPressed: isSearchingPrescription || isLoading
-                                    ? null
-                                    : _searchNextPrescriptionMedicine,
-                                icon: isSearchingPrescription
+                                onPressed:
+                                    isLoading ? null : _startPrescriptionSearch,
+                                icon: isLoading
                                     ? const SizedBox(
                                         width: 16,
                                         height: 16,
@@ -304,13 +346,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                                         ),
                                       )
                                     : const Icon(Icons.search),
-                                label: Text(
-                                  isSearchingPrescription
-                                      ? "Searching..."
-                                      : currentMedicineIndex == 0
-                                          ? "Start Searching Prescription Medicines"
-                                          : "Search Next Medicine",
-                                ),
+                                label: const Text('Start Search'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blue[600],
                                   foregroundColor: Colors.white,
@@ -320,6 +356,44 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                               ),
                             )
                           else
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: currentMedicineIndex > 0
+                                        ? _goToPreviousPrescriptionMedicine
+                                        : null,
+                                    icon: const Icon(Icons.chevron_left),
+                                    label: const Text('Prev'),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: Colors.teal[700],
+                                      side:
+                                          BorderSide(color: Colors.teal[300]!),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: currentMedicineIndex <
+                                            prescriptionMedicines!.length - 1
+                                        ? _goToNextPrescriptionMedicine
+                                        : null,
+                                    icon: const Icon(Icons.chevron_right),
+                                    label: const Text('Next'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue[600],
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          const SizedBox(height: 12),
+                          if (currentMedicineIndex >=
+                              prescriptionMedicines!.length - 1)
                             Container(
                               width: double.infinity,
                               padding: const EdgeInsets.all(12),
@@ -337,7 +411,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                                           color: Colors.green[700]),
                                       const SizedBox(width: 8),
                                       Text(
-                                        "All prescription medicines searched!",
+                                        'All prescription medicines searched!',
                                         style: TextStyle(
                                           fontWeight: FontWeight.w600,
                                           color: Colors.green[700],
@@ -347,8 +421,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    "Found: ${medicineSearchResults.values.where((found) => found).length}, "
-                                    "Not Available: ${medicineSearchResults.values.where((found) => !found).length}",
+                                    'Found: ${_foundPrescriptionCount()}, Not Available: ${_notFoundPrescriptionCount()}',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey[600],
@@ -363,8 +436,6 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                   ),
                   const SizedBox(height: 16),
                 ],
-
-                // Search Section
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -376,7 +447,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                             const SizedBox(width: 10),
                             const Expanded(
                               child: Text(
-                                "Search for generic medicines available in Jan Aushadhi stores",
+                                'Search for generic medicines available in Jan Aushadhi stores',
                                 style: TextStyle(fontSize: 14),
                               ),
                             ),
@@ -386,8 +457,8 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                         TextField(
                           controller: _searchController,
                           decoration: InputDecoration(
-                            labelText: "Medicine Name",
-                            hintText: "Paracetamol",
+                            labelText: 'Medicine Name',
+                            hintText: 'Paracetamol',
                             border: const OutlineInputBorder(),
                             suffixIcon: IconButton(
                               icon: const Icon(Icons.search),
@@ -414,8 +485,8 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                                   )
                                 : const Icon(Icons.search),
                             label: Text(isLoading
-                                ? "Searching..."
-                                : "Search Medicines"),
+                                ? 'Searching...'
+                                : 'Search Medicines'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green[600],
                               foregroundColor: Colors.white,
@@ -427,16 +498,13 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 16),
-
-                // API Status or Error
                 if (errorMessage != null) ...[
                   Card(
                     color: isApiDown
                         ? Colors.red[50]
                         : errorMessage!.contains(
-                                "not available in Jan Aushadhi stores")
+                                'not available in Jan Aushadhi stores')
                             ? Colors.blue[50]
                             : Colors.orange[50],
                     child: Padding(
@@ -447,13 +515,13 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                             isApiDown
                                 ? Icons.error
                                 : errorMessage!.contains(
-                                        "not available in Jan Aushadhi stores")
+                                        'not available in Jan Aushadhi stores')
                                     ? Icons.info
                                     : Icons.info_outline,
                             color: isApiDown
                                 ? Colors.red
                                 : errorMessage!.contains(
-                                        "not available in Jan Aushadhi stores")
+                                        'not available in Jan Aushadhi stores')
                                     ? Colors.blue[700]
                                     : Colors.orange,
                           ),
@@ -464,17 +532,17 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                               children: [
                                 Text(
                                   isApiDown
-                                      ? "Service Unavailable"
+                                      ? 'Service Unavailable'
                                       : errorMessage!.contains(
-                                              "not available in Jan Aushadhi stores")
-                                          ? "Medicine Not Available"
-                                          : "Search Results",
+                                              'not available in Jan Aushadhi stores')
+                                          ? 'Medicine Not Available'
+                                          : 'Search Results',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     color: isApiDown
                                         ? Colors.red
                                         : errorMessage!.contains(
-                                                "not available in Jan Aushadhi stores")
+                                                'not available in Jan Aushadhi stores')
                                             ? Colors.blue[700]
                                             : Colors.orange[800],
                                   ),
@@ -497,12 +565,8 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                   ),
                   const SizedBox(height: 16),
                 ],
-
-                // Results Section
-                SizedBox(
-                  height: MediaQuery.of(context).size.height *
-                      0.5, // Give it a fixed height
-                  child: searchResults.isEmpty
+                Expanded(
+                  child: visibleResults.isEmpty
                       ? Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -515,8 +579,11 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                               const SizedBox(height: 16),
                               Text(
                                 _searchController.text.isEmpty
-                                    ? "Enter a medicine name to search"
-                                    : "No medicines found",
+                                    ? 'Enter a medicine name to search'
+                                    : _hasPrescriptionMedicines &&
+                                            prescriptionSearchStarted
+                                        ? 'No medicines found for $_currentPrescriptionMedicine'
+                                        : 'No medicines found',
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.grey[600],
@@ -525,7 +592,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                               if (_searchController.text.isNotEmpty) ...[
                                 const SizedBox(height: 8),
                                 Text(
-                                  "Try searching with different keywords or generic names",
+                                  'Try searching with different keywords or generic names',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[500],
@@ -538,41 +605,34 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                         )
                       : Column(
                           children: [
-                            // Results header
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "${searchResults.length} medicine(s) found",
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                    ),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  _hasPrescriptionMedicines
+                                      ? 'Results for $_currentPrescriptionMedicine'
+                                      : '${visibleResults.length} medicine(s) found',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
                                   ),
-                                  if (lastUpdated != null)
-                                    Text(
-                                      "Updated: ${_formatDate(lastUpdated!)}",
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                ],
+                                ),
                               ),
                             ),
-
-                            // Results list
                             Expanded(
                               child: ListView.builder(
-                                itemCount: searchResults.length,
+                                itemCount: visibleResults.length,
                                 itemBuilder: (context, index) {
-                                  final medicine = searchResults[index];
+                                  final medicine = visibleResults[index];
                                   return Card(
                                     margin: const EdgeInsets.only(bottom: 8),
                                     child: ExpansionTile(
+                                      tilePadding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 4),
+                                      childrenPadding:
+                                          const EdgeInsets.fromLTRB(
+                                              16, 0, 16, 16),
                                       leading: CircleAvatar(
                                         backgroundColor: Colors.green[100],
                                         child: Text(
@@ -583,6 +643,16 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                                             color: Colors.green[700],
                                           ),
                                         ),
+                                      ),
+                                      trailing: Icon(
+                                        Icons.keyboard_arrow_down,
+                                        color: Colors.green[700],
+                                      ),
+                                      collapsedShape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
                                       title: Text(
                                         medicine.cleanGenericName,
@@ -606,7 +676,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
-                                            "• ${medicine.unitSize}",
+                                            '• ${medicine.unitSize}',
                                             style: TextStyle(
                                               color: Colors.grey[600],
                                               fontSize: 12,
@@ -615,84 +685,51 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                                         ],
                                       ),
                                       children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(16),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              _buildDetailRow("Drug Code",
-                                                  medicine.drugCode),
-                                              _buildDetailRow("Generic Name",
-                                                  medicine.cleanGenericName),
-                                              _buildDetailRow("Unit Size",
-                                                  medicine.unitSize),
-                                              _buildDetailRow(
-                                                  "MRP", "₹${medicine.mrp}"),
-                                              const SizedBox(height: 12),
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                    child: ElevatedButton.icon(
-                                                      onPressed: () {
-                                                        // TODO: Add to cart or find nearby stores
-                                                        ScaffoldMessenger.of(
-                                                                context)
-                                                            .showSnackBar(
-                                                          SnackBar(
-                                                            content: Text(
-                                                                "Added ${medicine.cleanGenericName} to your list"),
-                                                            backgroundColor:
-                                                                Colors.green,
-                                                          ),
-                                                        );
-                                                      },
-                                                      icon: const Icon(
-                                                          Icons
-                                                              .add_shopping_cart,
-                                                          size: 16),
-                                                      label: const Text(
-                                                          "Add to List"),
-                                                      style: ElevatedButton
-                                                          .styleFrom(
-                                                        backgroundColor:
-                                                            Colors.green[600],
-                                                        foregroundColor:
-                                                            Colors.white,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Expanded(
-                                                    child: OutlinedButton.icon(
-                                                      onPressed: () {
-                                                        Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                const StoreLocatorPage(),
-                                                          ),
-                                                        );
-                                                      },
-                                                      icon: const Icon(
-                                                          Icons.store,
-                                                          size: 16),
-                                                      label: const Text(
-                                                          "Find Stores"),
-                                                      style: OutlinedButton
-                                                          .styleFrom(
-                                                        foregroundColor:
-                                                            Colors.green[600],
-                                                        side: BorderSide(
-                                                            color: Colors
-                                                                .green[600]!),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: ElevatedButton.icon(
+                                                onPressed: () async {
+                                                  await _addToCart(medicine);
+                                                },
+                                                icon: const Icon(
+                                                    Icons.add_shopping_cart,
+                                                    size: 16),
+                                                label:
+                                                    const Text('Add to List'),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      Colors.green[600],
+                                                  foregroundColor: Colors.white,
+                                                ),
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: OutlinedButton.icon(
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          const StoreLocatorPage(),
+                                                    ),
+                                                  );
+                                                },
+                                                icon: const Icon(Icons.store,
+                                                    size: 16),
+                                                label:
+                                                    const Text('Find Stores'),
+                                                style: OutlinedButton.styleFrom(
+                                                  foregroundColor:
+                                                      Colors.green[600],
+                                                  side: BorderSide(
+                                                      color:
+                                                          Colors.green[600]!),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
@@ -706,9 +743,9 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
               ],
             ),
           ),
-        ), // Close SingleChildScrollView
-      ), // Close Container
-    ); // Close Scaffold
+        ),
+      ),
+    );
   }
 
   Widget _buildDetailRow(String label, String value) {
@@ -720,7 +757,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
           SizedBox(
             width: 80,
             child: Text(
-              "$label:",
+              '$label:',
               style: TextStyle(
                 fontWeight: FontWeight.w500,
                 color: Colors.grey[700],
@@ -731,28 +768,11 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 12,
-              ),
+              style: const TextStyle(fontSize: 12),
             ),
           ),
         ],
       ),
     );
-  }
-
-  String _formatDate(String dateString) {
-    try {
-      final date = DateTime.parse(dateString);
-      return "${date.day}/${date.month}/${date.year}";
-    } catch (e) {
-      return "Unknown";
-    }
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 }

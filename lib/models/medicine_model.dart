@@ -40,14 +40,12 @@ class Medicine {
 class JanAushadhiStore {
   String name;
   String address;
-  String? phone;
   double? distance;
   List<String> availableMedicines;
 
   JanAushadhiStore({
     required this.name,
     required this.address,
-    this.phone,
     this.distance,
     this.availableMedicines = const [],
   });

@@ -31,9 +31,7 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
   }
 
   Future<void> _checkApiStatus() async {
-    
     final status = await KendraApiService.checkStatus();
-    
 
     if (mounted) {
       setState(() {
@@ -138,15 +136,6 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
     });
   }
 
-  String _formatDate(String dateString) {
-    try {
-      final date = DateTime.parse(dateString);
-      return "${date.day}/${date.month}/${date.year}";
-    } catch (e) {
-      return "Unknown";
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     // Get screen dimensions for responsive design
@@ -215,6 +204,7 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                                 selected: selectedSearchType == 1,
                                 onSelected: (selected) {
                                   if (selected) {
+                                    FocusScope.of(context).unfocus();
                                     setState(() {
                                       selectedSearchType = 1;
                                       searchResults = [];
@@ -232,6 +222,7 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                                 selected: selectedSearchType == 2,
                                 onSelected: (selected) {
                                   if (selected) {
+                                    FocusScope.of(context).unfocus();
                                     setState(() {
                                       selectedSearchType = 2;
                                       searchResults = [];
@@ -258,7 +249,8 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.location_pin),
                             ),
-                            keyboardType: TextInputType.number,
+                            keyboardType: TextInputType.text,
+                            textCapitalization: TextCapitalization.none,
                             maxLength: 6,
                             onSubmitted: (_) => _searchStores(),
                           ),
@@ -272,8 +264,8 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.map),
                             ),
-                            keyboardType: TextInputType.text,
-                            textCapitalization: TextCapitalization.words,
+                            keyboardType: TextInputType.name,
+                            textCapitalization: TextCapitalization.none,
                           ),
                           const SizedBox(height: 12),
                           TextField(
@@ -284,8 +276,8 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.location_city),
                             ),
-                            keyboardType: TextInputType.text,
-                            textCapitalization: TextCapitalization.words,
+                            keyboardType: TextInputType.name,
+                            textCapitalization: TextCapitalization.none,
                             onSubmitted: (_) => _searchStores(),
                           ),
                         ] else if (selectedSearchType == 2) ...[
@@ -298,8 +290,8 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.qr_code),
                             ),
-                            keyboardType: TextInputType.text,
-                            textCapitalization: TextCapitalization.characters,
+                            keyboardType: TextInputType.name,
+                            textCapitalization: TextCapitalization.none,
                             onSubmitted: (_) => _searchStores(),
                           ),
                         ],
@@ -439,7 +431,7 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                                     ),
                                     if (lastUpdated != null)
                                       Text(
-                                        "Updated: ${_formatDate(lastUpdated!)}",
+                                        "Updated: $lastUpdated",
                                         style: TextStyle(
                                           fontSize: 10,
                                           color: Colors.grey[600],
@@ -493,8 +485,6 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                                             children: [
                                               _buildDetailRow("Kendra Code",
                                                   kendra.kendraCode),
-                                              _buildDetailRow("Contact",
-                                                  kendra.formattedContact),
                                               _buildDetailRow(
                                                   "Address", kendra.address),
                                               _buildDetailRow(
@@ -502,30 +492,6 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                                               const SizedBox(height: 12),
                                               Row(
                                                 children: [
-                                                  Expanded(
-                                                    child: ElevatedButton.icon(
-                                                      onPressed: () =>
-                                                          ActionUtils
-                                                              .handlePhoneCall(
-                                                        context,
-                                                        kendra.contact,
-                                                        storeName:
-                                                            kendra.cleanName,
-                                                      ),
-                                                      icon: const Icon(
-                                                          Icons.call,
-                                                          size: 16),
-                                                      label: const Text("Call"),
-                                                      style: ElevatedButton
-                                                          .styleFrom(
-                                                        backgroundColor:
-                                                            Colors.green[600],
-                                                        foregroundColor:
-                                                            Colors.white,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 8),
                                                   Expanded(
                                                     child: OutlinedButton.icon(
                                                       onPressed: () {
@@ -560,7 +526,7 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                                                           Icons.directions,
                                                           size: 16),
                                                       label: const Text(
-                                                          "Directions"),
+                                                          "Open Map"),
                                                       style: OutlinedButton
                                                           .styleFrom(
                                                         foregroundColor:

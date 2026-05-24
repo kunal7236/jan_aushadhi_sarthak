@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class JanAushadhiApiService {
-  static const String baseUrl = 'https://medicine-api-m176.onrender.com';
+  static const String baseUrl = 'https://jan-api.kunalka.me';
 
   // Check if the API service is live
   static Future<bool> checkStatus() async {
@@ -16,7 +16,12 @@ class JanAushadhiApiService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         try {
           final data = json.decode(response.body);
-          return data['message'] == 'Service is live';
+          if (data is Map<String, dynamic>) {
+            return data['message']?.toString().isNotEmpty == true ||
+                data['status']?.toString().isNotEmpty == true ||
+                data['live'] == true;
+          }
+          return true;
         } catch (e) {
           // Even if JSON parsing fails, if we got a 200 response, API is likely up
           return true;
@@ -31,7 +36,7 @@ class JanAushadhiApiService {
   // Search for medicines by name
   static Future<JanAushadhiSearchResult> searchMedicines(String query) async {
     try {
-      final searchUrl = '$baseUrl/search?name=${Uri.encodeComponent(query)}';
+      final searchUrl = '$baseUrl/search?q=${Uri.encodeComponent(query)}';
 
       final response = await http.get(
         Uri.parse(searchUrl),
@@ -43,18 +48,13 @@ class JanAushadhiApiService {
         try {
           final data = json.decode(response.body);
 
-          List<JanAushadhiMedicine> medicines = [];
-          if (data['results'] != null) {
-            for (var item in data['results']) {
-              medicines.add(JanAushadhiMedicine.fromJson(item));
-            }
-          }
+          final medicines = _parseMedicineResults(data);
 
           if (medicines.isEmpty) {
             // API responded correctly but no medicines found
             return JanAushadhiSearchResult(
               medicines: [],
-              updatedAt: data['updated_at'] ?? '',
+              updatedAt: '',
               success: true,
               error:
                   'Medicine "$query" is not available in Jan Aushadhi stores',
@@ -63,7 +63,7 @@ class JanAushadhiApiService {
 
           return JanAushadhiSearchResult(
             medicines: medicines,
-            updatedAt: data['updated_at'] ?? '',
+            updatedAt: '',
             success: true,
           );
         } catch (e) {
@@ -99,6 +99,33 @@ class JanAushadhiApiService {
       );
     }
   }
+
+  static List<JanAushadhiMedicine> _parseMedicineResults(dynamic data) {
+    final List<dynamic> rawResults = _extractResultList(data);
+    return rawResults
+        .whereType<Map<String, dynamic>>()
+        .map(JanAushadhiMedicine.fromJson)
+        .toList();
+  }
+
+  static List<dynamic> _extractResultList(dynamic data) {
+    if (data is List) {
+      return data;
+    }
+
+    if (data is Map<String, dynamic>) {
+      for (final key in ['results', 'data', 'items', 'medicines']) {
+        final value = data[key];
+        if (value is List) {
+          return value;
+        }
+      }
+
+      return [data];
+    }
+
+    return const [];
+  }
 }
 
 class JanAushadhiMedicine {
@@ -118,12 +145,23 @@ class JanAushadhiMedicine {
 
   factory JanAushadhiMedicine.fromJson(Map<String, dynamic> json) {
     return JanAushadhiMedicine(
-      srNo: json['Sr_No']?.toString() ?? '',
-      drugCode: json['Drug Code']?.toString() ?? '',
-      genericName: json['Generic Name']?.toString() ?? '',
-      unitSize: json['Unit Size']?.toString() ?? '',
-      mrp: json['MRP(in Rs_)']?.toString() ?? '',
+      srNo: _firstString(json, ['Sr_No', 'sr_no', 'srNo']),
+      drugCode: _firstString(json, ['Drug Code', 'drug_code', 'drugCode']),
+      genericName:
+          _firstString(json, ['Generic Name', 'generic_name', 'genericName']),
+      unitSize: _firstString(json, ['Unit Size', 'unit_size', 'unitSize']),
+      mrp: _firstString(json, ['MRP(in Rs_)', 'mrp', 'MRP']),
     );
+  }
+
+  static String _firstString(Map<String, dynamic> json, List<String> keys) {
+    for (final key in keys) {
+      final value = json[key];
+      if (value != null && value.toString().trim().isNotEmpty) {
+        return value.toString();
+      }
+    }
+    return '';
   }
 
   // Clean generic name for better display

@@ -99,6 +99,14 @@ class _MedicineExtractionPageState extends State<MedicineExtractionPage> {
     });
   }
 
+  void _selectAllMedicines() {
+    setState(() {
+      for (final medicine in extractedMedicines) {
+        medicine.isVerified = true;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Get screen dimensions for responsive design
@@ -164,6 +172,22 @@ class _MedicineExtractionPageState extends State<MedicineExtractionPage> {
                 ),
               ),
             ),
+            if (!isLoading && extractedMedicines.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _selectAllMedicines,
+                  icon: const Icon(Icons.done_all),
+                  label: const Text("Select All"),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.green[700],
+                    side: BorderSide(color: Colors.green[300]!),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
 
             // Loading or medicines list
@@ -306,6 +330,14 @@ class _MedicineExtractionPageState extends State<MedicineExtractionPage> {
                   child: ElevatedButton.icon(
                     onPressed: extractedMedicines.any((m) => m.isVerified)
                         ? () {
+                            final fileName = widget.prescriptionFile.path
+                                .split(Platform.pathSeparator)
+                                .last;
+                            final dotIndex = fileName.lastIndexOf('.');
+                            final draftTitle = dotIndex > 0
+                                ? fileName.substring(0, dotIndex)
+                                : fileName;
+
                             // Get verified medicines
                             List<String> verifiedMedicines = extractedMedicines
                                 .where((m) => m.isVerified)
@@ -317,6 +349,7 @@ class _MedicineExtractionPageState extends State<MedicineExtractionPage> {
                               MaterialPageRoute(
                                 builder: (context) => MedicineSearchPage(
                                   initialMedicines: verifiedMedicines,
+                                  initialDraftTitle: draftTitle,
                                 ),
                               ),
                             );

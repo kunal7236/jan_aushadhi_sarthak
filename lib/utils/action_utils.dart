@@ -1,71 +1,9 @@
 import 'package:flutter/material.dart';
-import 'phone_utils.dart';
 import 'directions_utils.dart';
 
-/// Utility class for handling common actions like calling and getting directions
+/// Utility class for handling common actions like getting directions
 /// This provides a centralized way to handle these actions with proper error handling
 class ActionUtils {
-  /// Handles making a phone call with user feedback
-  ///
-  /// [context] is required for showing snackbars
-  /// [phoneNumber] is the number to call
-  /// [storeName] is optional store name for better user feedback
-  static Future<void> handlePhoneCall(
-    BuildContext context,
-    String phoneNumber, {
-    String? storeName,
-  }) async {
-    try {
-      // Validate phone number first
-      if (!PhoneUtils.isValidPhoneNumber(phoneNumber)) {
-        _showErrorSnackBar(
-          context,
-          "Invalid phone number format. Please check the number and try again.",
-        );
-        return;
-      }
-
-      // Show loading indicator for a moment
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text("Opening dialer for ${storeName ?? 'store'}..."),
-            ],
-          ),
-          duration: const Duration(seconds: 1),
-          backgroundColor: Colors.blue[600],
-        ),
-      );
-
-      // Attempt to make the call
-      final success = await PhoneUtils.makePhoneCall(phoneNumber);
-
-      if (!success && context.mounted) {
-        _showErrorSnackBar(
-          context,
-          "Unable to open dialer. Please ensure you have a phone app installed.",
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        _showErrorSnackBar(
-          context,
-          "An error occurred while trying to make the call: $e",
-        );
-      }
-    }
-  }
-
   /// Handles getting directions with user feedback
   ///
   /// [context] is required for showing snackbars

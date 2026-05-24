@@ -40,6 +40,9 @@ dependencies:
   # HTTP requests for API calls
   http: ^1.2.0
 
+  # Local storage for cart drafts
+  shared_preferences: ^2.2.3
+
   # URL launcher for phone calls and directions
   url_launcher: ^6.2.0
 
