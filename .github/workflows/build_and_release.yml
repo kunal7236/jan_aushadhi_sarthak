@@ -1,0 +1,98 @@
+name: Build and Release APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build APKs and Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      - name: Bump version
+        id: bump
+        run: |
+          set -e
+          version_line=$(grep '^version:' pubspec.yaml || true)
+          ver=$(echo "$version_line" | sed 's/version: //')
+          name=${ver%%+*}
+          build=${ver##*+}
+          newbuild=$((build+1))
+          newver="${name}+${newbuild}"
+          sed -i "s/^version: .*/version: ${newver}/" pubspec.yaml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pubspec.yaml
+          git commit -m "chore: bump version to ${newver} [skip ci]" || echo "no changes to commit"
+          git push
+          echo "newver=${newver}" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build split APKs
+        run: flutter build apk --split-per-abi --release
+
+      - name: Build universal APK
+        run: flutter build apk --release
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ steps.bump.outputs.newver }}
+          release_name: Release ${{ steps.bump.outputs.newver }}
+          body: Automated APK release
+          draft: false
+          prerelease: false
+
+      - name: Upload arm64 apk
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          asset_name: app-arm64-v8a-${{ steps.bump.outputs.newver }}.apk
+          asset_content_type: application/vnd.android.package-archive
+
+      - name: Upload armeabi apk
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+          asset_name: app-armeabi-v7a-${{ steps.bump.outputs.newver }}.apk
+          asset_content_type: application/vnd.android.package-archive
+
+      - name: Upload x86_64 apk
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/app/outputs/flutter-apk/app-x86_64-release.apk
+          asset_name: app-x86_64-${{ steps.bump.outputs.newver }}.apk
+          asset_content_type: application/vnd.android.package-archive
+
+      - name: Upload universal apk
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/app/outputs/flutter-apk/app-release.apk
+          asset_name: app-universal-${{ steps.bump.outputs.newver }}.apk
+          asset_content_type: application/vnd.android.package-archive

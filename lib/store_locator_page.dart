@@ -101,6 +101,20 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
       }
 
       if (mounted) {
+        // If backend returned a server error (5xx), navigate to Contact tab
+        if (result.isServerError) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HomeShellPage(
+                initialIndex: 4,
+                contactOpenedDueToApiIssue: true,
+              ),
+            ),
+          );
+          return;
+        }
+
         setState(() {
           isLoading = false;
           if (result.success) {
@@ -113,16 +127,9 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                   "No Jan Aushadhi stores found for your search criteria.";
             }
           } else {
-            if (result.error != null &&
-                (result.error!.contains("Failed to connect") ||
-                    result.error!.contains("timeout") ||
-                    result.error!.contains("status code"))) {
-              isApiDown = true;
-              _checkApiStatus();
-            } else {
-              isApiDown = false;
-            }
-            errorMessage = result.error;
+            isApiDown = false;
+            errorMessage =
+                result.error ?? 'Something went wrong. Please try again.';
             searchResults = [];
           }
         });

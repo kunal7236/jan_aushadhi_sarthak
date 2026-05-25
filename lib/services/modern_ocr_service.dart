@@ -35,7 +35,6 @@ class ModernPrescriptionParser {
         prescriptionDate: DateTime.now(),
       );
     } catch (e) {
-      
       return PrescriptionParseResult(
         extractedMedicines: [],
         confidence: 0.0,

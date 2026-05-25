@@ -19,7 +19,6 @@ class _CartPageState extends State<CartPage> {
 
   Future<void> _showEditDraftDialog(MedicineDraft draft) async {
     final titleController = TextEditingController(text: draft.title);
-    final createdAtController = TextEditingController(text: draft.createdAt);
 
     await showDialog<void>(
       context: context,
@@ -37,7 +36,8 @@ class _CartPageState extends State<CartPage> {
             ),
             const SizedBox(height: 12),
             TextField(
-              controller: createdAtController,
+              controller: TextEditingController(text: draft.createdAt),
+              readOnly: true,
               decoration: const InputDecoration(
                 labelText: 'Created at',
                 border: OutlineInputBorder(),
@@ -52,15 +52,13 @@ class _CartPageState extends State<CartPage> {
           ),
           ElevatedButton(
             onPressed: () async {
-              if (titleController.text.trim().isEmpty ||
-                  createdAtController.text.trim().isEmpty) {
+              if (titleController.text.trim().isEmpty) {
                 return;
               }
 
               await CartStorageService.updateDraft(
                 draftId: draft.id,
                 title: titleController.text.trim(),
-                createdAt: createdAtController.text.trim(),
               );
               if (context.mounted) {
                 Navigator.pop(context);
@@ -158,9 +156,46 @@ class _CartPageState extends State<CartPage> {
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text('Created at ${draft.createdAt}'),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () => _showEditDraftDialog(draft),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () => _showEditDraftDialog(draft),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          color: Colors.red[700],
+                          tooltip: 'Delete list',
+                          onPressed: () async {
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Delete list?'),
+                                content: Text(
+                                    'Delete the list "${draft.title}"? This cannot be undone.'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, true),
+                                    child: const Text('Delete'),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            if (confirmed == true) {
+                              await CartStorageService.removeDraft(
+                                  draftId: draft.id);
+                            }
+                          },
+                        ),
+                      ],
                     ),
                     children: [
                       if (draft.medicines.isEmpty)

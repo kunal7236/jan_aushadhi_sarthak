@@ -182,7 +182,8 @@ class _FilepickerPageState extends State<FilepickerPage> {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
-                            onPressed: isProcessing ? null : processPrescription,
+                            onPressed:
+                                isProcessing ? null : processPrescription,
                             icon: isProcessing
                                 ? const SizedBox(
                                     width: 20,

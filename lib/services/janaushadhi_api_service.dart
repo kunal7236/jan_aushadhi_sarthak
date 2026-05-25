@@ -3,8 +3,6 @@ import 'package:http/http.dart' as http;
 
 class JanAushadhiApiService {
   static const String baseUrl = 'https://jan-api.kunalka.me';
-  static const String _genericError =
-      'Something went wrong. Please try again.';
 
   // Check if the API service is live
   static Future<bool> checkStatus() async {
@@ -48,6 +46,17 @@ class JanAushadhiApiService {
 
           final medicines = _parseMedicineResults(data);
 
+          if (medicines.isEmpty) {
+            // API responded correctly but no medicines found
+            return JanAushadhiSearchResult(
+              medicines: [],
+              updatedAt: '',
+              success: true,
+              error:
+                  'Medicine "$query" is not available in Jan Aushadhi stores',
+            );
+          }
+
           return JanAushadhiSearchResult(
             medicines: medicines,
             updatedAt: '',
@@ -58,24 +67,23 @@ class JanAushadhiApiService {
             medicines: [],
             updatedAt: '',
             success: false,
-            error: _genericError,
-            isServerError: false,
+            error: 'Error processing API response: $e',
           );
         }
       } else if (response.statusCode == 404) {
+        // Handle 404 specifically - medicine not found in database
         return JanAushadhiSearchResult(
           medicines: [],
           updatedAt: '',
           success: true,
+          error: 'Medicine "$query" is not available in Jan Aushadhi stores',
         );
       } else {
-        final isServerError = response.statusCode >= 500;
         return JanAushadhiSearchResult(
           medicines: [],
           updatedAt: '',
           success: false,
-          error: _genericError,
-          isServerError: isServerError,
+          error: 'API returned status code: ${response.statusCode}',
         );
       }
     } catch (e) {
@@ -83,8 +91,7 @@ class JanAushadhiApiService {
         medicines: [],
         updatedAt: '',
         success: false,
-        error: _genericError,
-        isServerError: false,
+        error: 'Failed to connect to medicine database: $e',
       );
     }
   }
@@ -176,13 +183,11 @@ class JanAushadhiSearchResult {
   final String updatedAt;
   final bool success;
   final String? error;
-  final bool isServerError;
 
   JanAushadhiSearchResult({
     required this.medicines,
     required this.updatedAt,
     required this.success,
     this.error,
-    this.isServerError = false,
   });
 }

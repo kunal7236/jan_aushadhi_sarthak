@@ -3,8 +3,6 @@ import 'package:http/http.dart' as http;
 
 class KendraApiService {
   static const String baseUrl = 'https://jan-api.kunalka.me';
-  static const String _genericError =
-      'Something went wrong. Please try again.';
 
   // Check if the Kendra API service is live
   static Future<KendraStatusResult> checkStatus() async {
@@ -27,21 +25,17 @@ class KendraApiService {
           );
         } catch (e) {
           return KendraStatusResult(
-            isLive: false,
-            updatedAt: '',
-            success: false,
-            error: _genericError,
-            isServerError: false,
-          );
+              isLive: false,
+              updatedAt: '',
+              success: false,
+              error: 'Invalid status response');
         }
       } else {
-        final isServerError = response.statusCode >= 500;
         return KendraStatusResult(
           isLive: false,
           updatedAt: '',
           success: false,
-          error: _genericError,
-          isServerError: isServerError,
+          error: 'API returned status code: ${response.statusCode}',
         );
       }
     } catch (e) {
@@ -49,8 +43,7 @@ class KendraApiService {
         isLive: false,
         updatedAt: '',
         success: false,
-        error: _genericError,
-        isServerError: false,
+        error: 'Failed to connect to Kendra service: $e',
       );
     }
   }
@@ -78,18 +71,16 @@ class KendraApiService {
             kendras: [],
             updatedAt: '',
             success: false,
-            error: _genericError,
-            isServerError: false,
+            error: 'Error parsing Kendra response: $e',
           );
         }
       } else {
-        final isServerError = response.statusCode >= 500;
         return KendraSearchResult(
           kendras: [],
           updatedAt: '',
           success: false,
-          error: _genericError,
-          isServerError: isServerError,
+          error: 'API returned status code: ${response.statusCode}',
+          isServerError: response.statusCode >= 500,
         );
       }
     } catch (e) {
@@ -97,7 +88,7 @@ class KendraApiService {
         kendras: [],
         updatedAt: '',
         success: false,
-        error: _genericError,
+        error: 'Failed to connect to Kendra database: $e',
         isServerError: false,
       );
     }
@@ -126,18 +117,16 @@ class KendraApiService {
             kendras: [],
             updatedAt: '',
             success: false,
-            error: _genericError,
-            isServerError: false,
+            error: 'Error parsing Kendra response: $e',
           );
         }
       } else {
-        final isServerError = response.statusCode >= 500;
         return KendraSearchResult(
           kendras: [],
           updatedAt: '',
           success: false,
-          error: _genericError,
-          isServerError: isServerError,
+          error: 'API returned status code: ${response.statusCode}',
+          isServerError: response.statusCode >= 500,
         );
       }
     } catch (e) {
@@ -145,7 +134,7 @@ class KendraApiService {
         kendras: [],
         updatedAt: '',
         success: false,
-        error: _genericError,
+        error: 'Failed to connect to Kendra database: $e',
         isServerError: false,
       );
     }
@@ -178,18 +167,16 @@ class KendraApiService {
             kendras: [],
             updatedAt: '',
             success: false,
-            error: _genericError,
-            isServerError: false,
+            error: 'Error parsing Kendra response: $e',
           );
         }
       } else {
-        final isServerError = response.statusCode >= 500;
         return KendraSearchResult(
           kendras: [],
           updatedAt: '',
           success: false,
-          error: _genericError,
-          isServerError: isServerError,
+          error: 'API returned status code: ${response.statusCode}',
+          isServerError: response.statusCode >= 500,
         );
       }
     } catch (e) {
@@ -197,10 +184,20 @@ class KendraApiService {
         kendras: [],
         updatedAt: '',
         success: false,
-        error: _genericError,
+        error: 'Failed to connect to Kendra database: $e',
         isServerError: false,
       );
     }
+  }
+
+  static bool isApiDownError(String? error) {
+    if (error == null) {
+      return false;
+    }
+
+    return error.contains('Failed to connect') ||
+        error.contains('timeout') ||
+        error.contains('status code');
   }
 
   static List<JanAushadhiKendra> _parseKendras(dynamic data) {
@@ -308,13 +305,11 @@ class KendraStatusResult {
   final String updatedAt;
   final bool success;
   final String? error;
-  final bool isServerError;
 
   KendraStatusResult({
     required this.isLive,
     required this.updatedAt,
     required this.success,
     this.error,
-    this.isServerError = false,
   });
 }

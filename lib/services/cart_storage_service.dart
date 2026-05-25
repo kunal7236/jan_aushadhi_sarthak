@@ -118,7 +118,6 @@ class CartStorageService {
   static Future<void> updateDraft({
     required String draftId,
     required String title,
-    required String createdAt,
   }) async {
     await initialize();
 
@@ -129,7 +128,16 @@ class CartStorageService {
     }
 
     drafts[draftIndex].title = title;
-    drafts[draftIndex].createdAt = createdAt;
+    await _saveDrafts(drafts);
+  }
+
+  static Future<void> removeDraft({
+    required String draftId,
+  }) async {
+    await initialize();
+
+    final drafts = List<MedicineDraft>.from(draftsNotifier.value);
+    drafts.removeWhere((d) => d.id == draftId);
     await _saveDrafts(drafts);
   }
 
@@ -145,7 +153,8 @@ class CartStorageService {
       return;
     }
 
-    if (medicineIndex < 0 || medicineIndex >= drafts[draftIndex].medicines.length) {
+    if (medicineIndex < 0 ||
+        medicineIndex >= drafts[draftIndex].medicines.length) {
       return;
     }
 
@@ -166,7 +175,8 @@ class CartStorageService {
       return;
     }
 
-    if (medicineIndex < 0 || medicineIndex >= drafts[draftIndex].medicines.length) {
+    if (medicineIndex < 0 ||
+        medicineIndex >= drafts[draftIndex].medicines.length) {
       return;
     }
 

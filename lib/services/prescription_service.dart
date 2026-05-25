@@ -261,7 +261,6 @@ class PrescriptionParser {
 
     return uniqueMedicines.values.toList();
   }
-
 }
 
 class MedicineDatabase {
