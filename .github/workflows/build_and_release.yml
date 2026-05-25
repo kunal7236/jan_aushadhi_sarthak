@@ -36,13 +36,14 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           set -e
+          umask 077
 
           if [ -z "$ANDROID_KEYSTORE_BASE64" ] || [ -z "$ANDROID_KEYSTORE_PASSWORD" ] || [ -z "$ANDROID_KEY_ALIAS" ] || [ -z "$ANDROID_KEY_PASSWORD" ]; then
             echo "Missing one or more Android signing secrets. Set ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, and ANDROID_KEY_PASSWORD." >&2
             exit 1
           fi
 
-          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/upload-keystore.jks
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
 
           cat > android/key.properties <<EOF
           storePassword=${ANDROID_KEYSTORE_PASSWORD}
@@ -119,3 +120,9 @@ jobs:
           asset_path: build/app/outputs/flutter-apk/app-release.apk
           asset_name: app-universal-${{ steps.bump.outputs.newver }}.apk
           asset_content_type: application/vnd.android.package-archive
+
+      - name: Cleanup signing files
+        if: always()
+        run: |
+          rm -f android/key.properties
+          rm -f android/app/upload-keystore.jks
