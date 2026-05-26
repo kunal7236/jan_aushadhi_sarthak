@@ -48,7 +48,7 @@ class _MedicineExtractionPageState extends State<MedicineExtractionPage> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Error extracting medicines: $e"),
+            content: Text("Unable to extract medicines. Please try again."),
             backgroundColor: Colors.red,
           ),
         );
@@ -454,7 +454,7 @@ class _GenericAlternativesPageState extends State<GenericAlternativesPage> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Error finding generic names: $e"),
+            content: Text("Unable to find generic names. Please try again."),
             backgroundColor: Colors.red,
           ),
         );

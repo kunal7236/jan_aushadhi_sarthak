@@ -24,9 +24,13 @@ class _HomeShellPageState extends State<HomeShellPage> {
   late int selectedIndex;
 
   late final List<Widget> pages = [
-    FilepickerPage(),
-    MedicineSearchPage(),
-    StoreLocatorPage(),
+    const FilepickerPage(),
+    MedicineSearchPage(
+      autoRedirectToContact: !widget.contactOpenedDueToApiIssue,
+    ),
+    StoreLocatorPage(
+      autoRedirectToContact: !widget.contactOpenedDueToApiIssue,
+    ),
     CartPage(),
     ContactDeveloperPage(
       showIssueBanner: widget.contactOpenedDueToApiIssue,

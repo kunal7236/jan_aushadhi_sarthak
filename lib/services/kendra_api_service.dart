@@ -1,10 +1,10 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
 class KendraApiService {
   static const String baseUrl = 'https://jan-api.kunalka.me';
 
-  // Check if the Kendra API service is live
   static Future<KendraStatusResult> checkStatus() async {
     try {
       final response = await http.get(
@@ -18,37 +18,38 @@ class KendraApiService {
           final isOnline = data is Map<String, dynamic>
               ? data['status']?.toString().toLowerCase() == 'online'
               : false;
+
           return KendraStatusResult(
             isLive: isOnline,
             updatedAt: '',
             success: true,
           );
-        } catch (e) {
+        } catch (_) {
           return KendraStatusResult(
-              isLive: false,
-              updatedAt: '',
-              success: false,
-              error: 'Invalid status response');
+            isLive: false,
+            updatedAt: '',
+            success: false,
+            error: 'Unable to check service status right now.',
+          );
         }
-      } else {
-        return KendraStatusResult(
-          isLive: false,
-          updatedAt: '',
-          success: false,
-          error: 'API returned status code: ${response.statusCode}',
-        );
       }
-    } catch (e) {
+
       return KendraStatusResult(
         isLive: false,
         updatedAt: '',
         success: false,
-        error: 'Failed to connect to Kendra service: $e',
+        error: 'Unable to check service status right now.',
+      );
+    } catch (_) {
+      return KendraStatusResult(
+        isLive: false,
+        updatedAt: '',
+        success: false,
+        error: 'Unable to check service status right now.',
       );
     }
   }
 
-  // Get Kendra by code
   static Future<KendraSearchResult> getKendraByCode(String kendraCode) async {
     try {
       final response = await http.get(
@@ -66,35 +67,33 @@ class KendraApiService {
             updatedAt: '',
             success: true,
           );
-        } catch (e) {
+        } catch (_) {
           return KendraSearchResult(
             kendras: [],
             updatedAt: '',
             success: false,
-            error: 'Error parsing Kendra response: $e',
+            error: 'Unable to load store information right now.',
           );
         }
-      } else {
-        return KendraSearchResult(
-          kendras: [],
-          updatedAt: '',
-          success: false,
-          error: 'API returned status code: ${response.statusCode}',
-          isServerError: response.statusCode >= 500,
-        );
       }
-    } catch (e) {
+
       return KendraSearchResult(
         kendras: [],
         updatedAt: '',
         success: false,
-        error: 'Failed to connect to Kendra database: $e',
-        isServerError: false,
+        error: 'Unable to load store information right now.',
+        isServerError: response.statusCode >= 500,
+      );
+    } catch (_) {
+      return KendraSearchResult(
+        kendras: [],
+        updatedAt: '',
+        success: false,
+        error: 'Unable to load store information right now.',
       );
     }
   }
 
-  // Get Kendras by pincode
   static Future<KendraSearchResult> getKendrasByPincode(String pincode) async {
     try {
       final response = await http.get(
@@ -112,35 +111,33 @@ class KendraApiService {
             updatedAt: '',
             success: true,
           );
-        } catch (e) {
+        } catch (_) {
           return KendraSearchResult(
             kendras: [],
             updatedAt: '',
             success: false,
-            error: 'Error parsing Kendra response: $e',
+            error: 'Unable to load store information right now.',
           );
         }
-      } else {
-        return KendraSearchResult(
-          kendras: [],
-          updatedAt: '',
-          success: false,
-          error: 'API returned status code: ${response.statusCode}',
-          isServerError: response.statusCode >= 500,
-        );
       }
-    } catch (e) {
+
       return KendraSearchResult(
         kendras: [],
         updatedAt: '',
         success: false,
-        error: 'Failed to connect to Kendra database: $e',
-        isServerError: false,
+        error: 'Unable to load store information right now.',
+        isServerError: response.statusCode >= 500,
+      );
+    } catch (_) {
+      return KendraSearchResult(
+        kendras: [],
+        updatedAt: '',
+        success: false,
+        error: 'Unable to load store information right now.',
       );
     }
   }
 
-  // Get Kendras by location (state and district)
   static Future<KendraSearchResult> getKendrasByLocation({
     required String state,
     required String district,
@@ -148,7 +145,8 @@ class KendraApiService {
     try {
       final response = await http.get(
         Uri.parse(
-            '$baseUrl/kendras?state=${Uri.encodeComponent(state)}&district=${Uri.encodeComponent(district)}'),
+          '$baseUrl/kendras?state=${Uri.encodeComponent(state)}&district=${Uri.encodeComponent(district)}',
+        ),
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 15));
 
@@ -162,30 +160,29 @@ class KendraApiService {
             updatedAt: '',
             success: true,
           );
-        } catch (e) {
+        } catch (_) {
           return KendraSearchResult(
             kendras: [],
             updatedAt: '',
             success: false,
-            error: 'Error parsing Kendra response: $e',
+            error: 'Unable to load store information right now.',
           );
         }
-      } else {
-        return KendraSearchResult(
-          kendras: [],
-          updatedAt: '',
-          success: false,
-          error: 'API returned status code: ${response.statusCode}',
-          isServerError: response.statusCode >= 500,
-        );
       }
-    } catch (e) {
+
       return KendraSearchResult(
         kendras: [],
         updatedAt: '',
         success: false,
-        error: 'Failed to connect to Kendra database: $e',
-        isServerError: false,
+        error: 'Unable to load store information right now.',
+        isServerError: response.statusCode >= 500,
+      );
+    } catch (_) {
+      return KendraSearchResult(
+        kendras: [],
+        updatedAt: '',
+        success: false,
+        error: 'Unable to load store information right now.',
       );
     }
   }
@@ -195,9 +192,7 @@ class KendraApiService {
       return false;
     }
 
-    return error.contains('Failed to connect') ||
-        error.contains('timeout') ||
-        error.contains('status code');
+    return error.contains('timeout') || error.contains('status code');
   }
 
   static List<JanAushadhiKendra> _parseKendras(dynamic data) {
@@ -228,7 +223,6 @@ class KendraApiService {
   }
 }
 
-// Data Models
 class JanAushadhiKendra {
   final String srNo;
   final String kendraCode;
@@ -252,11 +246,15 @@ class JanAushadhiKendra {
     return JanAushadhiKendra(
       srNo: _firstString(json, ['Sr.No', 'sr_no', 'srNo', 'id']),
       kendraCode: _firstString(
-          json, ['Kendra Code', 'kendra_code', 'kendraCode', 'code']),
+        json,
+        ['Kendra Code', 'kendra_code', 'kendraCode', 'code'],
+      ),
       name: _firstString(json, ['Name', 'name', 'store_name', 'kendra_name']),
       stateName: _firstString(json, ['State Name', 'state_name', 'state']),
-      districtName:
-          _firstString(json, ['District Name', 'district_name', 'district']),
+      districtName: _firstString(
+        json,
+        ['District Name', 'district_name', 'district'],
+      ),
       pinCode: _firstString(json, ['Pin Code', 'pin_code', 'pincode', 'pin']),
       address: _firstString(
           json, ['Address', 'address', 'location', 'full_address']),
@@ -270,15 +268,14 @@ class JanAushadhiKendra {
         return value.toString();
       }
     }
+
     return '';
   }
 
-  // Clean name for better display
   String get cleanName {
     return name.replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 
-  // Get full location string
   String get fullLocation {
     return '$districtName, $stateName - $pinCode';
   }

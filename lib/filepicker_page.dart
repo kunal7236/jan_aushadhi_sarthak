@@ -69,7 +69,7 @@ class _FilepickerPageState extends State<FilepickerPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Error processing prescription: $e"),
+          content: Text("Error processing prescription. Please try again."),
           backgroundColor: Colors.red,
         ),
       );

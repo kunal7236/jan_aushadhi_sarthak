@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'home_shell.dart';
 import 'services/kendra_api_service.dart';
 import 'utils/action_utils.dart';
+import 'utils/app_error_messages.dart';
 
 class StoreLocatorPage extends StatefulWidget {
-  const StoreLocatorPage({super.key});
+  final bool autoRedirectToContact;
+
+  const StoreLocatorPage({
+    super.key,
+    this.autoRedirectToContact = true,
+  });
 
   @override
   State<StoreLocatorPage> createState() => _StoreLocatorPageState();
@@ -21,6 +27,7 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
   bool isApiDown = false;
   String? errorMessage;
   String? lastUpdated;
+  bool _navigatedToContact = false;
 
   // Search type: 0 = pincode, 1 = location, 2 = kendra code
   int selectedSearchType = 0;
@@ -28,32 +35,50 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
   @override
   void initState() {
     super.initState();
-    _checkApiStatus();
+    if (widget.autoRedirectToContact) {
+      _checkApiStatus();
+    }
   }
 
   Future<void> _checkApiStatus() async {
+    if (!widget.autoRedirectToContact || _navigatedToContact) {
+      return;
+    }
+
     final status = await KendraApiService.checkStatus();
 
-    if (mounted) {
-      if (!status.isLive) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HomeShellPage(
-              initialIndex: 4,
-              contactOpenedDueToApiIssue: true,
-            ),
-          ),
-        );
-        return;
-      }
-
-      setState(() {
-        isApiDown = false;
-        lastUpdated = status.updatedAt;
-        errorMessage = null;
-      });
+    if (!mounted || _navigatedToContact) {
+      return;
     }
+
+    if (!status.isLive) {
+      _goToContactPage();
+      return;
+    }
+
+    setState(() {
+      isApiDown = false;
+      lastUpdated = status.updatedAt;
+      errorMessage = null;
+    });
+  }
+
+  void _goToContactPage() {
+    if (!mounted || _navigatedToContact) {
+      return;
+    }
+
+    _navigatedToContact = true;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const HomeShellPage(
+          initialIndex: 4,
+          contactOpenedDueToApiIssue: true,
+        ),
+      ),
+    );
   }
 
   Future<void> _searchStores() async {
@@ -102,16 +127,8 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
 
       if (mounted) {
         // If backend returned a server error (5xx), navigate to Contact tab
-        if (result.isServerError) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const HomeShellPage(
-                initialIndex: 4,
-                contactOpenedDueToApiIssue: true,
-              ),
-            ),
-          );
+        if (result.isServerError && widget.autoRedirectToContact) {
+          _goToContactPage();
           return;
         }
 
@@ -128,8 +145,9 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
             }
           } else {
             isApiDown = false;
-            errorMessage =
-                result.error ?? 'Something went wrong. Please try again.';
+            errorMessage = result.isServerError
+                ? AppErrorMessages.serviceUnavailable
+                : AppErrorMessages.generic;
             searchResults = [];
           }
         });
@@ -138,7 +156,7 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
       if (mounted) {
         setState(() {
           isLoading = false;
-          errorMessage = "An error occurred: $e";
+          errorMessage = AppErrorMessages.generic;
           searchResults = [];
         });
       }

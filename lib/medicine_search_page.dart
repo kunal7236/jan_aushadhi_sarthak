@@ -4,15 +4,18 @@ import 'home_shell.dart';
 import 'services/cart_storage_service.dart';
 import 'services/janaushadhi_api_service.dart';
 import 'store_locator_page.dart';
+import 'utils/app_error_messages.dart';
 
 class MedicineSearchPage extends StatefulWidget {
   final List<String>? initialMedicines;
   final String? initialDraftTitle;
+  final bool autoRedirectToContact;
 
   const MedicineSearchPage({
     super.key,
     this.initialMedicines,
     this.initialDraftTitle,
+    this.autoRedirectToContact = true,
   });
 
   @override
@@ -25,6 +28,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
   bool isLoading = false;
   bool isApiDown = false;
   String? errorMessage;
+  bool _navigatedToContact = false;
 
   List<String>? prescriptionMedicines;
   int currentMedicineIndex = 0;
@@ -41,7 +45,9 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
   @override
   void initState() {
     super.initState();
-    _checkApiStatus();
+    if (widget.autoRedirectToContact) {
+      _checkApiStatus();
+    }
 
     if (widget.initialMedicines != null &&
         widget.initialMedicines!.isNotEmpty) {
@@ -62,22 +68,18 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
   }
 
   Future<void> _checkApiStatus() async {
+    if (!widget.autoRedirectToContact || _navigatedToContact) {
+      return;
+    }
+
     final isLive = await JanAushadhiApiService.checkStatus();
 
-    if (!mounted) {
+    if (!mounted || _navigatedToContact) {
       return;
     }
 
     if (!isLive) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const HomeShellPage(
-            initialIndex: 4,
-            contactOpenedDueToApiIssue: true,
-          ),
-        ),
-      );
+      _goToContactPage();
       return;
     }
 
@@ -87,6 +89,24 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
         errorMessage = null;
       }
     });
+  }
+
+  void _goToContactPage() {
+    if (!mounted || _navigatedToContact) {
+      return;
+    }
+
+    _navigatedToContact = true;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const HomeShellPage(
+          initialIndex: 4,
+          contactOpenedDueToApiIssue: true,
+        ),
+      ),
+    );
   }
 
   Future<void> _searchMedicines({String? forcedQuery}) async {
@@ -112,10 +132,15 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
       return;
     }
 
+    if (result.isServerError && widget.autoRedirectToContact) {
+      _goToContactPage();
+      return;
+    }
+
     setState(() {
       isLoading = false;
       searchResults = List<JanAushadhiMedicine>.from(result.medicines);
-      isApiDown = false;
+      isApiDown = result.isServerError;
 
       if (_hasPrescriptionMedicines && prescriptionMedicines!.contains(query)) {
         prescriptionMedicineResults[query] =
@@ -128,15 +153,13 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
               'No medicines found for "$query". Try another medicine or check the spelling.';
         }
       } else {
-        if (result.error != null &&
-            (result.error!.contains('Failed to connect') ||
-                result.error!.contains('timeout') ||
-                result.error!.contains('status code'))) {
-          isApiDown = true;
-          _checkApiStatus();
+        if (result.isServerError) {
+          errorMessage = AppErrorMessages.serviceUnavailable;
+          searchResults = [];
+        } else {
+          errorMessage = AppErrorMessages.generic;
+          searchResults = [];
         }
-        errorMessage = result.error;
-        searchResults = [];
       }
     });
   }

@@ -68,7 +68,7 @@ class ActionUtils {
       if (context.mounted) {
         _showErrorSnackBar(
           context,
-          "An error occurred while trying to get directions: $e",
+          "Unable to get directions right now. Please try again.",
         );
       }
     }
@@ -131,7 +131,7 @@ class ActionUtils {
       if (context.mounted) {
         _showErrorSnackBar(
           context,
-          "An error occurred while trying to start navigation: $e",
+          "Unable to start navigation right now. Please try again.",
         );
       }
     }

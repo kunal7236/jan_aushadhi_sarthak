@@ -67,7 +67,7 @@ class JanAushadhiApiService {
             medicines: [],
             updatedAt: '',
             success: false,
-            error: 'Error processing API response: $e',
+            error: 'Unable to load medicines right now. Please try again.',
           );
         }
       } else if (response.statusCode == 404) {
@@ -84,6 +84,7 @@ class JanAushadhiApiService {
           updatedAt: '',
           success: false,
           error: 'API returned status code: ${response.statusCode}',
+          isServerError: response.statusCode >= 500,
         );
       }
     } catch (e) {
@@ -91,7 +92,7 @@ class JanAushadhiApiService {
         medicines: [],
         updatedAt: '',
         success: false,
-        error: 'Failed to connect to medicine database: $e',
+        error: 'Unable to load medicines right now. Please try again.',
       );
     }
   }
@@ -183,11 +184,13 @@ class JanAushadhiSearchResult {
   final String updatedAt;
   final bool success;
   final String? error;
+  final bool isServerError;
 
   JanAushadhiSearchResult({
     required this.medicines,
     required this.updatedAt,
     required this.success,
     this.error,
+    this.isServerError = false,
   });
 }
