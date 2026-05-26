@@ -11,8 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    env:
-      JAVA_TOOL_OPTIONS: -Xlint:-options
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
