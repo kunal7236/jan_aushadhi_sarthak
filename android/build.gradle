@@ -27,6 +27,12 @@ subprojects {
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
         kotlinOptions.jvmTarget = '17'
     }
+
+    // Some transitive Android dependencies still compile with source/target 8.
+    // Suppress obsolete option warnings until those dependencies update.
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs += ['-Xlint:-options']
+    }
 }
 
 rootProject.buildDir = "../build"
