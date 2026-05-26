@@ -37,20 +37,6 @@ class Medicine {
   }
 }
 
-class JanAushadhiStore {
-  String name;
-  String address;
-  double? distance;
-  List<String> availableMedicines;
-
-  JanAushadhiStore({
-    required this.name,
-    required this.address,
-    this.distance,
-    this.availableMedicines = const [],
-  });
-}
-
 class PrescriptionParseResult {
   List<Medicine> extractedMedicines;
   String? doctorName;

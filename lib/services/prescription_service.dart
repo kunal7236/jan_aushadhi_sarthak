@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import '../models/medicine_model.dart';
-import 'kendra_api_service.dart';
 
 class PrescriptionParser {
   static final _textRecognizer = TextRecognizer();
@@ -52,7 +51,6 @@ class PrescriptionParser {
         prescriptionDate: DateTime.now(),
       );
     } catch (e) {
-      // Return empty result instead of dummy data
       return PrescriptionParseResult(
         extractedMedicines: [],
         confidence: 0.0,
@@ -260,152 +258,5 @@ class PrescriptionParser {
     }
 
     return uniqueMedicines.values.toList();
-  }
-}
-
-class MedicineDatabase {
-  // Medicine lookup is currently backed by a local mapping and Jan Aushadhi API.
-
-  static Future<Medicine?> findGenericName(String commercialName) async {
-    // Simulate database lookup
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    // Dummy mapping - replace with actual database
-    final Map<String, String> commercialToGeneric = {
-      'crocin': 'Paracetamol',
-      'dolo': 'Paracetamol',
-      'calpol': 'Paracetamol',
-      'amoxiclav': 'Amoxicillin + Clavulanic Acid',
-      'augmentin': 'Amoxicillin + Clavulanic Acid',
-      'pantoprazole': 'Pantoprazole',
-      'pantocid': 'Pantoprazole',
-      'cetirizine': 'Cetirizine',
-      'zyrtec': 'Cetirizine',
-    };
-
-    final generic = commercialToGeneric[commercialName.toLowerCase()];
-    if (generic != null) {
-      return Medicine(
-        commercialName: commercialName,
-        genericName: generic,
-        isVerified: true,
-      );
-    }
-
-    return null;
-  }
-
-  static Future<List<Medicine>> searchJanAushadhiAvailability(
-      List<Medicine> medicines) async {
-    // Simulate API call to Jan Aushadhi database
-    await Future.delayed(const Duration(seconds: 1));
-
-    for (var medicine in medicines) {
-      // Dummy availability check
-      medicine.isAvailableInJanAushadhi = medicine.genericName != null;
-      if (medicine.isAvailableInJanAushadhi) {
-        medicine.janAushadhiPrice =
-            "₹${(10 + (medicine.commercialName.length % 50)).toString()}";
-        medicine.marketPrice =
-            "₹${(50 + (medicine.commercialName.length % 200)).toString()}";
-      }
-    }
-
-    return medicines;
-  }
-
-  static Future<List<JanAushadhiStore>> findNearbyStores({
-    double? latitude,
-    double? longitude,
-    int radius = 10, // km
-  }) async {
-    // For now, return empty list since we don't have location-based search
-    // User should use findStoresByPincode or findStoresByLocation instead
-    return [];
-  }
-
-  // Find stores by pincode using Kendra API
-  static Future<List<JanAushadhiStore>> findStoresByPincode(
-      String pincode) async {
-    try {
-      final result = await KendraApiService.getKendrasByPincode(pincode);
-
-      if (result.success) {
-        return result.kendras
-            .map((kendra) => JanAushadhiStore(
-                  name: kendra.cleanName,
-                  address: kendra.address,
-                  // Distance not available from API, setting to null
-                  distance: null,
-                  availableMedicines: [], // Not available from this API
-                ))
-            .toList();
-      } else {
-        return [];
-      }
-    } catch (e) {
-      return [];
-    }
-  }
-
-  // Find stores by state and district using Kendra API
-  static Future<List<JanAushadhiStore>> findStoresByLocation({
-    required String state,
-    required String district,
-  }) async {
-    try {
-      final result = await KendraApiService.getKendrasByLocation(
-        state: state,
-        district: district,
-      );
-
-      if (result.success) {
-        return result.kendras
-            .map((kendra) => JanAushadhiStore(
-                  name: kendra.cleanName,
-                  address: kendra.address,
-                  // Distance not available from API, setting to null
-                  distance: null,
-                  availableMedicines: [], // Not available from this API
-                ))
-            .toList();
-      } else {
-        return [];
-      }
-    } catch (e) {
-      return [];
-    }
-  }
-
-  // Find store by Kendra code using Kendra API
-  static Future<JanAushadhiStore?> findStoreByKendraCode(
-      String kendraCode) async {
-    try {
-      final result = await KendraApiService.getKendraByCode(kendraCode);
-
-      if (result.success && result.kendras.isNotEmpty) {
-        final kendra = result.kendras.first;
-        return JanAushadhiStore(
-          name: kendra.cleanName,
-          address: kendra.address,
-          distance: null, // Not available from API
-          availableMedicines: [], // Not available from this API
-        );
-      } else {
-        return null;
-      }
-    } catch (e) {
-      return null;
-    }
-  }
-
-  // Check Kendra API status
-  static Future<bool> isKendraApiLive() async {
-    try {
-      final status = await KendraApiService.checkStatus();
-      return status.isLive;
-    } catch (e) {
-      return false;
-    }
   }
 }

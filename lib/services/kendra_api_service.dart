@@ -51,102 +51,30 @@ class KendraApiService {
   }
 
   static Future<KendraSearchResult> getKendraByCode(String kendraCode) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/kendras?q=${Uri.encodeComponent(kendraCode)}'),
-        headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 15));
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        try {
-          final data = json.decode(response.body);
-          final kendras = _parseKendras(data);
-
-          return KendraSearchResult(
-            kendras: kendras,
-            updatedAt: '',
-            success: true,
-          );
-        } catch (_) {
-          return KendraSearchResult(
-            kendras: [],
-            updatedAt: '',
-            success: false,
-            error: 'Unable to load store information right now.',
-          );
-        }
-      }
-
-      return KendraSearchResult(
-        kendras: [],
-        updatedAt: '',
-        success: false,
-        error: 'Unable to load store information right now.',
-        isServerError: response.statusCode >= 500,
-      );
-    } catch (_) {
-      return KendraSearchResult(
-        kendras: [],
-        updatedAt: '',
-        success: false,
-        error: 'Unable to load store information right now.',
-      );
-    }
+    return _searchKendras(
+      '$baseUrl/kendras?q=${Uri.encodeComponent(kendraCode)}',
+    );
   }
 
   static Future<KendraSearchResult> getKendrasByPincode(String pincode) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/kendras?pincode=${Uri.encodeComponent(pincode)}'),
-        headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 15));
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        try {
-          final data = json.decode(response.body);
-          final kendras = _parseKendras(data);
-
-          return KendraSearchResult(
-            kendras: kendras,
-            updatedAt: '',
-            success: true,
-          );
-        } catch (_) {
-          return KendraSearchResult(
-            kendras: [],
-            updatedAt: '',
-            success: false,
-            error: 'Unable to load store information right now.',
-          );
-        }
-      }
-
-      return KendraSearchResult(
-        kendras: [],
-        updatedAt: '',
-        success: false,
-        error: 'Unable to load store information right now.',
-        isServerError: response.statusCode >= 500,
-      );
-    } catch (_) {
-      return KendraSearchResult(
-        kendras: [],
-        updatedAt: '',
-        success: false,
-        error: 'Unable to load store information right now.',
-      );
-    }
+    return _searchKendras(
+      '$baseUrl/kendras?pincode=${Uri.encodeComponent(pincode)}',
+    );
   }
 
   static Future<KendraSearchResult> getKendrasByLocation({
     required String state,
     required String district,
   }) async {
+    return _searchKendras(
+      '$baseUrl/kendras?state=${Uri.encodeComponent(state)}&district=${Uri.encodeComponent(district)}',
+    );
+  }
+
+  static Future<KendraSearchResult> _searchKendras(String url) async {
     try {
       final response = await http.get(
-        Uri.parse(
-          '$baseUrl/kendras?state=${Uri.encodeComponent(state)}&district=${Uri.encodeComponent(district)}',
-        ),
+        Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 15));
 
@@ -185,14 +113,6 @@ class KendraApiService {
         error: 'Unable to load store information right now.',
       );
     }
-  }
-
-  static bool isApiDownError(String? error) {
-    if (error == null) {
-      return false;
-    }
-
-    return error.contains('timeout') || error.contains('status code');
   }
 
   static List<JanAushadhiKendra> _parseKendras(dynamic data) {

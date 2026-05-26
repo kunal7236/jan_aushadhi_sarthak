@@ -529,29 +529,11 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                                                   Expanded(
                                                     child: OutlinedButton.icon(
                                                       onPressed: () {
-                                                        // Construct a more complete address for better navigation
-                                                        String fullAddress =
-                                                            kendra.address;
-                                                        if (kendra.pinCode
-                                                            .isNotEmpty) {
-                                                          fullAddress +=
-                                                              ', ${kendra.pinCode}';
-                                                        }
-                                                        if (kendra.districtName
-                                                            .isNotEmpty) {
-                                                          fullAddress +=
-                                                              ', ${kendra.districtName}';
-                                                        }
-                                                        if (kendra.stateName
-                                                            .isNotEmpty) {
-                                                          fullAddress +=
-                                                              ', ${kendra.stateName}';
-                                                        }
-
                                                         ActionUtils
                                                             .handleDirections(
                                                           context,
-                                                          fullAddress,
+                                                          _buildFullAddress(
+                                                              kendra),
                                                           storeName:
                                                               kendra.cleanName,
                                                         );
@@ -579,29 +561,10 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                                                 width: double.infinity,
                                                 child: ElevatedButton.icon(
                                                   onPressed: () {
-                                                    // Construct a more complete address for better navigation
-                                                    String fullAddress =
-                                                        kendra.address;
-                                                    if (kendra
-                                                        .pinCode.isNotEmpty) {
-                                                      fullAddress +=
-                                                          ', ${kendra.pinCode}';
-                                                    }
-                                                    if (kendra.districtName
-                                                        .isNotEmpty) {
-                                                      fullAddress +=
-                                                          ', ${kendra.districtName}';
-                                                    }
-                                                    if (kendra
-                                                        .stateName.isNotEmpty) {
-                                                      fullAddress +=
-                                                          ', ${kendra.stateName}';
-                                                    }
-
                                                     ActionUtils
                                                         .handleNavigation(
                                                       context,
-                                                      fullAddress,
+                                                      _buildFullAddress(kendra),
                                                       storeName:
                                                           kendra.cleanName,
                                                     );
@@ -668,6 +631,17 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
         ],
       ),
     );
+  }
+
+  String _buildFullAddress(JanAushadhiKendra kendra) {
+    final parts = <String>[
+      kendra.address,
+      kendra.pinCode,
+      kendra.districtName,
+      kendra.stateName,
+    ].where((part) => part.trim().isNotEmpty).toList();
+
+    return parts.join(', ');
   }
 
   @override

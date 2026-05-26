@@ -55,7 +55,7 @@ class _FilepickerPageState extends State<FilepickerPage> {
 
       if (!mounted) return;
 
-      // For now, navigate to medicine extraction page with dummy data
+      // Navigate to medicine extraction page for OCR parsing.
       Navigator.push(
         context,
         MaterialPageRoute(
