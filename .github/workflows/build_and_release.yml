@@ -70,6 +70,12 @@ jobs:
           git push
           echo "newver=${newver}" >> $GITHUB_OUTPUT
 
+      - name: Repair pub cache
+        if: always()
+        run: |
+          # Repair the pub cache to avoid corrupted package downloads on CI
+          flutter pub cache repair
+
       - name: Install dependencies
         run: flutter pub get
 
