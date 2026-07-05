@@ -91,7 +91,8 @@ class ContactDeveloperPage extends StatelessWidget {
                           contentPadding: EdgeInsets.zero,
                           leading: CircleAvatar(
                             backgroundColor: Colors.blue[100],
-                            child: Icon(Icons.alternate_email, color: Colors.blue[900]),
+                            child: Icon(Icons.alternate_email,
+                                color: Colors.blue[900]),
                           ),
                           title: const Text('X / Twitter'),
                           trailing: const Icon(Icons.open_in_new),
