@@ -314,94 +314,102 @@ class _MedicineExtractionPageState extends State<MedicineExtractionPage> {
     );
   }
 
-  void _showEditDialog(int index) {
+  Future<void> _showEditDialog(int index) async {
     final controller =
         TextEditingController(text: extractedMedicines[index].commercialName);
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Edit Medicine Name"),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: "Medicine Name",
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                _editMedicine(index, controller.text.trim());
-                Navigator.pop(context);
-              }
-            },
-            child: const Text("Save"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAddMedicineDialog() {
-    final controller = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Add Medicine Manually"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              "Enter the medicine name as it appears on your prescription:",
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+    try {
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Edit Medicine Name"),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              labelText: "Medicine Name",
+              border: OutlineInputBorder(),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: "Medicine Name",
-                border: OutlineInputBorder(),
-                hintText: "e.g., Paracetamol, Crocin, etc.",
-              ),
-              textCapitalization: TextCapitalization.words,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (controller.text.trim().isNotEmpty) {
+                  _editMedicine(index, controller.text.trim());
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text("Save"),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                setState(() {
-                  extractedMedicines.add(Medicine(
-                    commercialName: controller.text.trim(),
-                    isVerified: true, // Manual entries are pre-verified
-                  ));
-                });
-                Navigator.pop(context);
+      );
+    } finally {
+      controller.dispose();
+    }
+  }
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("Added ${controller.text.trim()}"),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              }
-            },
-            child: const Text("Add"),
+  Future<void> _showAddMedicineDialog() async {
+    final controller = TextEditingController();
+
+    try {
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Add Medicine Manually"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Enter the medicine name as it appears on your prescription:",
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                decoration: const InputDecoration(
+                  labelText: "Medicine Name",
+                  border: OutlineInputBorder(),
+                  hintText: "e.g., Paracetamol, Crocin, etc.",
+                ),
+                textCapitalization: TextCapitalization.words,
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (controller.text.trim().isNotEmpty) {
+                  setState(() {
+                    extractedMedicines.add(Medicine(
+                      commercialName: controller.text.trim(),
+                      isVerified: true, // Manual entries are pre-verified
+                    ));
+                  });
+                  Navigator.pop(context);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Added ${controller.text.trim()}"),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              },
+              child: const Text("Add"),
+            ),
+          ],
+        ),
+      );
+    } finally {
+      controller.dispose();
+    }
   }
 }

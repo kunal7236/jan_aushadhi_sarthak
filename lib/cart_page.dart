@@ -20,55 +20,59 @@ class _CartPageState extends State<CartPage> {
   Future<void> _showEditDraftDialog(MedicineDraft draft) async {
     final titleController = TextEditingController(text: draft.title);
 
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Draft'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                border: OutlineInputBorder(),
+    try {
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Edit Draft'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(),
+                ),
               ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: TextEditingController(text: draft.createdAt),
+                readOnly: true,
+                decoration: const InputDecoration(
+                  labelText: 'Created at',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: TextEditingController(text: draft.createdAt),
-              readOnly: true,
-              decoration: const InputDecoration(
-                labelText: 'Created at',
-                border: OutlineInputBorder(),
-              ),
+            ElevatedButton(
+              onPressed: () async {
+                if (titleController.text.trim().isEmpty) {
+                  return;
+                }
+
+                await CartStorageService.updateDraft(
+                  draftId: draft.id,
+                  title: titleController.text.trim(),
+                );
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Save'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (titleController.text.trim().isEmpty) {
-                return;
-              }
-
-              await CartStorageService.updateDraft(
-                draftId: draft.id,
-                title: titleController.text.trim(),
-              );
-              if (context.mounted) {
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
+      );
+    } finally {
+      titleController.dispose();
+    }
   }
 
   Future<void> _deleteMedicine({
