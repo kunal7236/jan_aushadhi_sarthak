@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// FontAwesome removed due to SDK compatibility; using Material icons instead.
 import 'package:url_launcher/url_launcher.dart';
 
 class ContactDeveloperPage extends StatelessWidget {
@@ -91,7 +91,7 @@ class ContactDeveloperPage extends StatelessWidget {
                           contentPadding: EdgeInsets.zero,
                           leading: CircleAvatar(
                             backgroundColor: Colors.blue[100],
-                            child: const FaIcon(FontAwesomeIcons.xTwitter),
+                            child: Icon(Icons.alternate_email, color: Colors.blue[900]),
                           ),
                           title: const Text('X / Twitter'),
                           trailing: const Icon(Icons.open_in_new),
@@ -104,7 +104,7 @@ class ContactDeveloperPage extends StatelessWidget {
                           contentPadding: EdgeInsets.zero,
                           leading: CircleAvatar(
                             backgroundColor: Colors.blue[100],
-                            child: const FaIcon(FontAwesomeIcons.telegram),
+                            child: Icon(Icons.send, color: Colors.blue[900]),
                           ),
                           title: const Text('Telegram'),
                           trailing: const Icon(Icons.open_in_new),

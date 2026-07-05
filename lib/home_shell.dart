@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// Replaced FontAwesome icons with Material icons to avoid package issues
 
 import 'cart_page.dart';
 import 'contact_developer_page.dart';
@@ -66,32 +66,28 @@ class _HomeShellPageState extends State<HomeShellPage> {
         },
         destinations: const [
           NavigationDestination(
-            icon: FaIcon(FontAwesomeIcons.fileArrowUp),
-            selectedIcon:
-                FaIcon(FontAwesomeIcons.fileArrowUp, color: Colors.white),
+            icon: Icon(Icons.upload_file),
+            selectedIcon: Icon(Icons.upload_file, color: Colors.white),
             label: 'Upload',
           ),
           NavigationDestination(
-            icon: FaIcon(FontAwesomeIcons.magnifyingGlass),
-            selectedIcon:
-                FaIcon(FontAwesomeIcons.magnifyingGlass, color: Colors.white),
+            icon: Icon(Icons.search),
+            selectedIcon: Icon(Icons.search, color: Colors.white),
             label: 'Medicines',
           ),
           NavigationDestination(
-            icon: FaIcon(FontAwesomeIcons.store),
-            selectedIcon: FaIcon(FontAwesomeIcons.store, color: Colors.white),
+            icon: Icon(Icons.store),
+            selectedIcon: Icon(Icons.store, color: Colors.white),
             label: 'Kendras',
           ),
           NavigationDestination(
-            icon: FaIcon(FontAwesomeIcons.listCheck),
-            selectedIcon:
-                FaIcon(FontAwesomeIcons.listCheck, color: Colors.white),
+            icon: Icon(Icons.list_alt),
+            selectedIcon: Icon(Icons.list_alt, color: Colors.white),
             label: 'List',
           ),
           NavigationDestination(
-            icon: FaIcon(FontAwesomeIcons.circleQuestion),
-            selectedIcon:
-                FaIcon(FontAwesomeIcons.circleQuestion, color: Colors.white),
+            icon: Icon(Icons.help_outline),
+            selectedIcon: Icon(Icons.help_outline, color: Colors.white),
             label: 'Help',
           ),
         ],
