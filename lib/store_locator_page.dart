@@ -659,47 +659,6 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
     );
   }
 
-  Widget _buildTapDetailRow(
-    String label,
-    String value, {
-    VoidCallback? onTap,
-  }) {
-    final isInteractive = onTap != null;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: InkWell(
-        onTap: onTap,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: 80,
-              child: Text(
-                "$label:",
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey[700],
-                  fontSize: 12,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Text(
-                value,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isInteractive ? Colors.blue[700] : null,
-                  decoration: isInteractive ? TextDecoration.underline : null,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   String _buildFullAddress(JanAushadhiKendra kendra) {
     final parts = <String>[
       kendra.address,

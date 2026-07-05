@@ -52,6 +52,12 @@ class _HomeShellPageState extends State<HomeShellPage> {
         children: pages,
       ),
       bottomNavigationBar: NavigationBar(
+        height: 64,
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        indicatorColor: Colors.green[600],
+        indicatorShape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         selectedIndex: selectedIndex,
         onDestinationSelected: (index) {
           setState(() {
@@ -61,28 +67,32 @@ class _HomeShellPageState extends State<HomeShellPage> {
         destinations: const [
           NavigationDestination(
             icon: FaIcon(FontAwesomeIcons.fileArrowUp),
-            selectedIcon: FaIcon(FontAwesomeIcons.fileArrowUp),
+            selectedIcon:
+                FaIcon(FontAwesomeIcons.fileArrowUp, color: Colors.white),
             label: 'Upload',
           ),
           NavigationDestination(
             icon: FaIcon(FontAwesomeIcons.magnifyingGlass),
-            selectedIcon: FaIcon(FontAwesomeIcons.magnifyingGlass),
+            selectedIcon:
+                FaIcon(FontAwesomeIcons.magnifyingGlass, color: Colors.white),
             label: 'Medicines',
           ),
           NavigationDestination(
             icon: FaIcon(FontAwesomeIcons.store),
-            selectedIcon: FaIcon(FontAwesomeIcons.store),
+            selectedIcon: FaIcon(FontAwesomeIcons.store, color: Colors.white),
             label: 'Kendras',
           ),
           NavigationDestination(
             icon: FaIcon(FontAwesomeIcons.listCheck),
-            selectedIcon: FaIcon(FontAwesomeIcons.listCheck),
+            selectedIcon:
+                FaIcon(FontAwesomeIcons.listCheck, color: Colors.white),
             label: 'List',
           ),
           NavigationDestination(
-            icon: FaIcon(FontAwesomeIcons.addressBook),
-            selectedIcon: FaIcon(FontAwesomeIcons.addressBook),
-            label: 'Contact',
+            icon: FaIcon(FontAwesomeIcons.questionCircle),
+            selectedIcon:
+                FaIcon(FontAwesomeIcons.questionCircle, color: Colors.white),
+            label: 'Help',
           ),
         ],
       ),

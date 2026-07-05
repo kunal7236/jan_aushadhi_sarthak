@@ -20,7 +20,7 @@ class ContactDeveloperPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Contact Developer'),
+        title: const Text('Help'),
         backgroundColor: Colors.green[700],
         foregroundColor: Colors.white,
       ),
@@ -80,7 +80,7 @@ class ContactDeveloperPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Developer Info',
+                          'Developer Contact',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
