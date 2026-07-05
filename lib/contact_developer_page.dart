@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContactDeveloperPage extends StatelessWidget {
@@ -90,7 +91,7 @@ class ContactDeveloperPage extends StatelessWidget {
                           contentPadding: EdgeInsets.zero,
                           leading: CircleAvatar(
                             backgroundColor: Colors.blue[100],
-                            child: const Icon(Icons.flutter_dash),
+                            child: const FaIcon(FontAwesomeIcons.xTwitter),
                           ),
                           title: const Text('X / Twitter'),
                           trailing: const Icon(Icons.open_in_new),
@@ -103,7 +104,7 @@ class ContactDeveloperPage extends StatelessWidget {
                           contentPadding: EdgeInsets.zero,
                           leading: CircleAvatar(
                             backgroundColor: Colors.blue[100],
-                            child: const Icon(Icons.send),
+                            child: const FaIcon(FontAwesomeIcons.telegram),
                           ),
                           title: const Text('Telegram'),
                           trailing: const Icon(Icons.open_in_new),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'cart_page.dart';
 import 'contact_developer_page.dart';
@@ -59,28 +60,28 @@ class _HomeShellPageState extends State<HomeShellPage> {
         },
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.upload_file_outlined),
-            selectedIcon: Icon(Icons.upload_file),
+            icon: FaIcon(FontAwesomeIcons.fileArrowUp),
+            selectedIcon: FaIcon(FontAwesomeIcons.fileArrowUp),
             label: 'Upload',
           ),
           NavigationDestination(
-            icon: Icon(Icons.search_outlined),
-            selectedIcon: Icon(Icons.search),
+            icon: FaIcon(FontAwesomeIcons.magnifyingGlass),
+            selectedIcon: FaIcon(FontAwesomeIcons.magnifyingGlass),
             label: 'Medicines',
           ),
           NavigationDestination(
-            icon: Icon(Icons.store_outlined),
-            selectedIcon: Icon(Icons.store),
+            icon: FaIcon(FontAwesomeIcons.store),
+            selectedIcon: FaIcon(FontAwesomeIcons.store),
             label: 'Kendras',
           ),
           NavigationDestination(
-            icon: Icon(Icons.list_alt_outlined),
-            selectedIcon: Icon(Icons.list_alt),
+            icon: FaIcon(FontAwesomeIcons.listCheck),
+            selectedIcon: FaIcon(FontAwesomeIcons.listCheck),
             label: 'List',
           ),
           NavigationDestination(
-            icon: Icon(Icons.contact_support_outlined),
-            selectedIcon: Icon(Icons.contact_support),
+            icon: FaIcon(FontAwesomeIcons.addressBook),
+            selectedIcon: FaIcon(FontAwesomeIcons.addressBook),
             label: 'Contact',
           ),
         ],
