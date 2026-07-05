@@ -146,20 +146,26 @@ class KendraApiService {
 class JanAushadhiKendra {
   final String srNo;
   final String kendraCode;
-  final String name;
+  final String contactName;
+  final String contactNumber;
   final String stateName;
   final String districtName;
   final String pinCode;
   final String address;
+  final double? latitude;
+  final double? longitude;
 
   JanAushadhiKendra({
     required this.srNo,
     required this.kendraCode,
-    required this.name,
+    required this.contactName,
+    required this.contactNumber,
     required this.stateName,
     required this.districtName,
     required this.pinCode,
     required this.address,
+    required this.latitude,
+    required this.longitude,
   });
 
   factory JanAushadhiKendra.fromJson(Map<String, dynamic> json) {
@@ -169,7 +175,21 @@ class JanAushadhiKendra {
         json,
         ['Kendra Code', 'kendra_code', 'kendraCode', 'code'],
       ),
-      name: _firstString(json, ['Name', 'name', 'store_name', 'kendra_name']),
+      contactName: _firstString(
+        json,
+        [
+          'contact_name',
+          'contact_person',
+          'Name',
+          'name',
+          'store_name',
+          'kendra_name'
+        ],
+      ),
+      contactNumber: _firstString(
+        json,
+        ['contact_number', 'contactNumber', 'phone', 'phone_number', 'mobile'],
+      ),
       stateName: _firstString(json, ['State Name', 'state_name', 'state']),
       districtName: _firstString(
         json,
@@ -178,6 +198,18 @@ class JanAushadhiKendra {
       pinCode: _firstString(json, ['Pin Code', 'pin_code', 'pincode', 'pin']),
       address: _firstString(
           json, ['Address', 'address', 'location', 'full_address']),
+      latitude: _firstDouble(
+        json,
+        ['latitude', 'lat'],
+        minimum: -90,
+        maximum: 90,
+      ),
+      longitude: _firstDouble(
+        json,
+        ['longitude', 'lng', 'lon', 'long'],
+        minimum: -180,
+        maximum: 180,
+      ),
     );
   }
 
@@ -192,12 +224,39 @@ class JanAushadhiKendra {
     return '';
   }
 
+  static double? _firstDouble(
+    Map<String, dynamic> json,
+    List<String> keys, {
+    required double minimum,
+    required double maximum,
+  }) {
+    for (final key in keys) {
+      final value = json[key];
+      if (value == null) {
+        continue;
+      }
+
+      final parsed =
+          value is num ? value.toDouble() : double.tryParse(value.toString());
+
+      if (parsed != null && parsed >= minimum && parsed <= maximum) {
+        return parsed;
+      }
+    }
+
+    return null;
+  }
+
   String get cleanName {
-    return name.replaceAll(RegExp(r'\s+'), ' ').trim();
+    return contactName.replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 
   String get fullLocation {
     return '$districtName, $stateName - $pinCode';
+  }
+
+  bool get hasCoordinates {
+    return latitude != null && longitude != null;
   }
 }
 

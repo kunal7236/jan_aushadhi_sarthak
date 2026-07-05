@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'home_shell.dart';
 import 'services/kendra_api_service.dart';
 import 'utils/action_utils.dart';
@@ -26,7 +27,6 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
   bool isLoading = false;
   bool isApiDown = false;
   String? errorMessage;
-  String? lastUpdated;
   bool _navigatedToContact = false;
 
   // Search type: 0 = pincode, 1 = location, 2 = kendra code
@@ -58,7 +58,6 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
 
     setState(() {
       isApiDown = false;
-      lastUpdated = status.updatedAt;
       errorMessage = null;
     });
   }
@@ -136,7 +135,6 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
           isLoading = false;
           if (result.success) {
             searchResults = result.kendras;
-            lastUpdated = result.updatedAt;
             isApiDown = false;
 
             if (result.kendras.isEmpty) {
@@ -168,6 +166,16 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
       isLoading = false;
       errorMessage = message;
     });
+  }
+
+  Future<void> _launchPhoneDialer(String phoneNumber) async {
+    final sanitizedNumber = phoneNumber.replaceAll(RegExp(r'\s+'), '');
+    if (sanitizedNumber.isEmpty) {
+      return;
+    }
+
+    final uri = Uri(scheme: 'tel', path: sanitizedNumber);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
@@ -463,14 +471,6 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                                         fontSize: 16,
                                       ),
                                     ),
-                                    if (lastUpdated != null)
-                                      Text(
-                                        "Updated: $lastUpdated",
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
                                   ],
                                 ),
                               ),
@@ -485,14 +485,36 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                                   return Card(
                                     margin: const EdgeInsets.only(bottom: 8),
                                     child: ExpansionTile(
+                                      tilePadding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                      ),
+                                      childrenPadding: const EdgeInsets.only(
+                                        left: 16,
+                                        right: 16,
+                                        bottom: 16,
+                                      ),
+                                      shape: const RoundedRectangleBorder(
+                                        side: BorderSide.none,
+                                      ),
+                                      collapsedShape:
+                                          const RoundedRectangleBorder(
+                                        side: BorderSide.none,
+                                      ),
                                       leading: CircleAvatar(
                                         backgroundColor: Colors.green[100],
-                                        child: Text(
-                                          kendra.srNo,
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.green[700],
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(4),
+                                            child: Text(
+                                              kendra.kendraCode,
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green[700],
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -536,6 +558,10 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                                                               kendra),
                                                           storeName:
                                                               kendra.cleanName,
+                                                          latitude:
+                                                              kendra.latitude,
+                                                          longitude:
+                                                              kendra.longitude,
                                                         );
                                                       },
                                                       icon: const Icon(
@@ -553,35 +579,35 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                                                       ),
                                                     ),
                                                   ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 8),
-                                              // Navigation button (full width)
-                                              SizedBox(
-                                                width: double.infinity,
-                                                child: ElevatedButton.icon(
-                                                  onPressed: () {
-                                                    ActionUtils
-                                                        .handleNavigation(
-                                                      context,
-                                                      _buildFullAddress(kendra),
-                                                      storeName:
-                                                          kendra.cleanName,
-                                                    );
-                                                  },
-                                                  icon: const Icon(
-                                                      Icons.navigation,
-                                                      size: 16),
-                                                  label: const Text(
-                                                      "Start Navigation"),
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        Colors.blue[600],
-                                                    foregroundColor:
-                                                        Colors.white,
+                                                  const SizedBox(width: 12),
+                                                  Expanded(
+                                                    child: ElevatedButton.icon(
+                                                      onPressed: kendra
+                                                              .contactNumber
+                                                              .isEmpty
+                                                          ? null
+                                                          : () =>
+                                                              _launchPhoneDialer(
+                                                                kendra
+                                                                    .contactNumber,
+                                                              ),
+                                                      icon: const Icon(
+                                                        Icons.phone,
+                                                        size: 16,
+                                                      ),
+                                                      label: const Text(
+                                                        "Contact",
+                                                      ),
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        backgroundColor:
+                                                            Colors.blue[600],
+                                                        foregroundColor:
+                                                            Colors.white,
+                                                      ),
+                                                    ),
                                                   ),
-                                                ),
+                                                ],
                                               ),
                                             ],
                                           ),
@@ -629,6 +655,47 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTapDetailRow(
+    String label,
+    String value, {
+    VoidCallback? onTap,
+  }) {
+    final isInteractive = onTap != null;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: InkWell(
+        onTap: onTap,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 80,
+              child: Text(
+                "$label:",
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[700],
+                  fontSize: 12,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isInteractive ? Colors.blue[700] : null,
+                  decoration: isInteractive ? TextDecoration.underline : null,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

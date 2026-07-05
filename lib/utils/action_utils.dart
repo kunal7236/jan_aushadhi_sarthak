@@ -13,10 +13,14 @@ class ActionUtils {
     BuildContext context,
     String address, {
     String? storeName,
+    double? latitude,
+    double? longitude,
   }) async {
     try {
-      // Validate address first
-      if (!DirectionsUtils.isValidAddress(address)) {
+      final hasCoordinates = latitude != null && longitude != null;
+
+      // Validate the best available destination data first.
+      if (!hasCoordinates && !DirectionsUtils.isValidAddress(address)) {
         _showErrorSnackBar(
           context,
           "The address appears to be incomplete. Please check the address manually.",
@@ -47,13 +51,15 @@ class ActionUtils {
       );
 
       // Try to get directions first
-      bool success = await DirectionsUtils.getDirections(
+      bool success = await DirectionsUtils.showOnMap(
         address: address,
+        latitude: latitude,
+        longitude: longitude,
       );
 
       if (!success && context.mounted) {
-        // Fallback: try to show location on map
-        success = await DirectionsUtils.showOnMap(
+        // Fallback: try to get directions using the address.
+        success = await DirectionsUtils.getDirections(
           address: address,
         );
 
@@ -83,10 +89,13 @@ class ActionUtils {
     BuildContext context,
     String address, {
     String? storeName,
+    double? latitude,
+    double? longitude,
   }) async {
     try {
-      // Validate address first
-      if (!DirectionsUtils.isValidAddress(address)) {
+      final hasCoordinates = latitude != null && longitude != null;
+
+      if (!hasCoordinates && !DirectionsUtils.isValidAddress(address)) {
         _showErrorSnackBar(
           context,
           "The address appears to be incomplete for navigation.",
@@ -119,6 +128,8 @@ class ActionUtils {
       // Start navigation
       final success = await DirectionsUtils.startNavigation(
         address: address,
+        latitude: latitude,
+        longitude: longitude,
       );
 
       if (!success && context.mounted) {
