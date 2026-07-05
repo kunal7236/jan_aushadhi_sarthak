@@ -295,7 +295,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Search Jan Aushadhi Medicines'),
+        title: const Text('JanAushadhi Medicines'),
         backgroundColor: Colors.green[700],
         foregroundColor: Colors.white,
       ),
@@ -579,7 +579,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                             const SizedBox(width: 10),
                             const Expanded(
                               child: Text(
-                                'Search for generic medicines available in Jan Aushadhi stores',
+                                'Search for generic medicines available in JanAushadhi stores',
                                 style: TextStyle(fontSize: 14),
                               ),
                             ),
@@ -636,7 +636,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                     color: isApiDown
                         ? Colors.red[50]
                         : errorMessage!.contains(
-                                'not available in Jan Aushadhi stores')
+                                'not available in JanAushadhi stores')
                             ? Colors.blue[50]
                             : Colors.orange[50],
                     child: Padding(
@@ -647,13 +647,13 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                             isApiDown
                                 ? Icons.error
                                 : errorMessage!.contains(
-                                        'not available in Jan Aushadhi stores')
+                                        'not available in JanAushadhi stores')
                                     ? Icons.info
                                     : Icons.info_outline,
                             color: isApiDown
                                 ? Colors.red
                                 : errorMessage!.contains(
-                                        'not available in Jan Aushadhi stores')
+                                        'not available in JanAushadhi stores')
                                     ? Colors.blue[700]
                                     : Colors.orange,
                           ),
@@ -666,7 +666,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                                   isApiDown
                                       ? 'Service Unavailable'
                                       : errorMessage!.contains(
-                                              'not available in Jan Aushadhi stores')
+                                              'not available in JanAushadhi stores')
                                           ? 'Medicine Not Available'
                                           : 'Search Results',
                                   style: TextStyle(
@@ -674,7 +674,7 @@ class _MedicineSearchPageState extends State<MedicineSearchPage> {
                                     color: isApiDown
                                         ? Colors.red
                                         : errorMessage!.contains(
-                                                'not available in Jan Aushadhi stores')
+                                                'not available in JanAushadhi stores')
                                             ? Colors.blue[700]
                                             : Colors.orange[800],
                                   ),

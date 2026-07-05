@@ -139,7 +139,7 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
 
             if (result.kendras.isEmpty) {
               errorMessage =
-                  "No Jan Aushadhi stores found for your search criteria.";
+                  "No JanAushadhi stores found for your search criteria.";
             }
           } else {
             isApiDown = false;
@@ -185,7 +185,7 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Find Jan Aushadhi Stores"),
+        title: const Text("JanAushadhi Stores"),
         backgroundColor: Colors.green[700],
         foregroundColor: Colors.white,
       ),
@@ -212,7 +212,7 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "Search by:",
+                          "Search by",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -435,7 +435,7 @@ class _StoreLocatorPageState extends State<StoreLocatorPage> {
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                "Search for Jan Aushadhi stores",
+                                "Search for JanAushadhi stores",
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.grey[600],

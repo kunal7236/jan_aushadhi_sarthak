@@ -258,7 +258,7 @@ class _MedicineExtractionPageState extends State<MedicineExtractionPage> {
 
               const SizedBox(height: 8),
 
-              // Find Jan Aushadhi alternatives button (only when medicines exist)
+              // Find JanAushadhi alternatives button (only when medicines exist)
               if (extractedMedicines.isNotEmpty)
                 SizedBox(
                   width: double.infinity,
@@ -291,7 +291,7 @@ class _MedicineExtractionPageState extends State<MedicineExtractionPage> {
                           }
                         : null,
                     icon: const Icon(Icons.search),
-                    label: const Text("Find Jan Aushadhi Alternatives"),
+                    label: const Text("Find JanAushadhi Alternatives"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green[600],
                       foregroundColor: Colors.white,

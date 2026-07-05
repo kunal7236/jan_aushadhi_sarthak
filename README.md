@@ -1,6 +1,6 @@
-# Jan Aushadhi Sarthak
+# JanAushadhi Sarthak
 
-Lightweight Flutter app to help users find generic medicines from Jan Aushadhi stores by extracting medicine names from prescription images and searching a live API.
+Lightweight Flutter app to help users find generic medicines from JanAushadhi stores by extracting medicine names from prescription images and searching a live API.
 
 Status
 ------

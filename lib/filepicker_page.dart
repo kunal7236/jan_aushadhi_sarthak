@@ -107,7 +107,7 @@ class _FilepickerPageState extends State<FilepickerPage> {
               ),
               const SizedBox(height: 20),
               const Text(
-                "Jan Aushadhi Sarthak",
+                "JanAushadhi Sarthak",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

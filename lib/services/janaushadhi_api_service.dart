@@ -53,7 +53,7 @@ class JanAushadhiApiService {
               updatedAt: '',
               success: true,
               error:
-                  'Medicine "$query" is not available in Jan Aushadhi stores',
+                  'Medicine "$query" is not available in JanAushadhi stores',
             );
           }
 
@@ -76,7 +76,7 @@ class JanAushadhiApiService {
           medicines: [],
           updatedAt: '',
           success: true,
-          error: 'Medicine "$query" is not available in Jan Aushadhi stores',
+          error: 'Medicine "$query" is not available in JanAushadhi stores',
         );
       } else {
         return JanAushadhiSearchResult(

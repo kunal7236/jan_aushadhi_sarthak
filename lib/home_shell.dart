@@ -89,9 +89,9 @@ class _HomeShellPageState extends State<HomeShellPage> {
             label: 'List',
           ),
           NavigationDestination(
-            icon: FaIcon(FontAwesomeIcons.questionCircle),
+            icon: FaIcon(FontAwesomeIcons.circleQuestion),
             selectedIcon:
-                FaIcon(FontAwesomeIcons.questionCircle, color: Colors.white),
+                FaIcon(FontAwesomeIcons.circleQuestion, color: Colors.white),
             label: 'Help',
           ),
         ],

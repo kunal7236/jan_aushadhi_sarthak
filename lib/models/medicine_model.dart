@@ -1,4 +1,4 @@
-// Data models for the Jan Aushadhi Sarthak app
+// Data models for the JanAushadhi Sarthak app
 
 class Medicine {
   String commercialName;
